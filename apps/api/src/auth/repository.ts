@@ -49,4 +49,14 @@ export const authRepository = {
       where: { tokenHash, revokedAt: null },
       data: { revokedAt: new Date() },
     }),
+
+  /** Deletes expired login/refresh tokens older than `olderThan`. */
+  async deleteExpiredTokens(olderThan: Date) {
+    const [login, refresh] = await Promise.all([
+      prisma.loginToken.deleteMany({ where: { expiresAt: { lt: olderThan } } }),
+      prisma.refreshToken.deleteMany({ where: { expiresAt: { lt: olderThan } } }),
+    ])
+    return { login: login.count, refresh: refresh.count }
+  }
+
 }
