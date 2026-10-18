@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react'
+import { IonButton, IonContent, IonHeader, IonPage, IonTitle, IonToolbar } from '@ionic/react'
 import { getHealth } from '../lib/api.ts'
+import { logout } from '../lib/session.ts'
 
 export default function Home() {
   const [api, setApi] = useState('checking...')
@@ -18,7 +19,10 @@ export default function Home() {
           <IonTitle>Kinotest Admin</IonTitle>
         </IonToolbar>
       </IonHeader>
-      <IonContent className="ion-padding">API status: {api}</IonContent>
+      <IonContent className="ion-padding">
+        API status: {api}
+      <IonButton onClick={logout}>Saír</IonButton>
+      </IonContent>
     </IonPage>
   )
 }
