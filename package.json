@@ -1,0 +1,25 @@
+{
+  "name": "kinotest",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev:api": "npm run dev -w @kinotest/api",
+    "dev:mobile": "npm run dev -w @kinotest/mobile",
+    "dev:admin": "npm run dev -w @kinotest/admin",
+    "dev:site": "npm run dev -w @kinotest/site",
+    "build": "npm run build --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "db:up": "node scripts/db.mjs up",
+    "db:down": "node scripts/db.mjs down",
+    "db:logs": "node scripts/db.mjs logs"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.2"
+  }
+}
