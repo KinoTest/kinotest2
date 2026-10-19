@@ -21,7 +21,12 @@ export default function Home() {
       </IonHeader>
       <IonContent className="ion-padding">
         API status: {api}
-      <IonButton onClick={logout}>Saír</IonButton>
+        <div>
+          <IonButton routerLink="/content">Contidos</IonButton>
+          <IonButton fill="outline" onClick={logout}>
+            Saír
+          </IonButton>
+        </div>
       </IonContent>
     </IonPage>
   )
