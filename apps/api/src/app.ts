@@ -3,7 +3,7 @@ import express from 'express'
 import type { NextFunction, Request, Response } from 'express'
 import { authRouter } from './auth/routes.ts'
 import { env } from './env.ts'
-import { contentRouter } from './routes/content.ts'
+import { contentRouter } from './content/routes.ts'
 
 export const app = express()
 
