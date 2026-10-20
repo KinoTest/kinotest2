@@ -1,10 +1,13 @@
-import type { ContentItemInput, ContentItemUpdate } from '@kinotest/shared'
+import type { ContentDocument } from '@kinotest/shared'
 import { ApiError, authFetch } from './session.ts'
 
-export interface ContentItem {
+/** What the listing returns: the document without its `data`. */
+export interface ContentSummary {
   id: string
+  slug: string
+  lang: string
   title: string
-  description: string
+  formatVersion: number
   authorId: string
   createdAt: string
   updatedAt: string
@@ -22,12 +25,13 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   return (res.status === 204 ? undefined : await res.json()) as T
 }
 
-export const listContent = (): Promise<ContentItem[]> => request('')
+export const listContent = (): Promise<ContentSummary[]> => request('')
 
-export const createContent = (input: ContentItemInput): Promise<ContentItem> =>
-  request('', { method: 'POST', body: JSON.stringify(input) })
+export const createContent = (doc: ContentDocument): Promise<ContentSummary> =>
+  request('', { method: 'POST', body: JSON.stringify(doc) })
 
-export const updateContent = (id: string, input: ContentItemUpdate): Promise<ContentItem> =>
-  request(`/${id}`, { method: 'PATCH', body: JSON.stringify(input) })
+/** Replaces the whole document. */
+export const replaceContent = (id: string, doc: ContentDocument): Promise<ContentSummary> =>
+  request(`/${id}`, { method: 'PUT', body: JSON.stringify(doc) })
 
 export const deleteContent = (id: string): Promise<void> => request(`/${id}`, { method: 'DELETE' })

@@ -9,7 +9,7 @@ export const app = express()
 
 app.set('trust proxy', 1)
 app.use(cors({ origin: env.CORS_ORIGINS.split(',').map((o) => o.trim()) }))
-app.use(express.json())
+app.use(express.json({ limit: "2mb" }))
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })

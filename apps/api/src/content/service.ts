@@ -1,10 +1,19 @@
-import type { ContentItemInput, ContentItemUpdate } from '@kinotest/shared'
+import type { ContentDocument } from '@kinotest/shared'
 import { contentRepository as repo } from './repository.ts'
 
-// Thin for now (plain CRUD). Business rules for the store will live here.
+// The document is the unit of storage: slug, lang and title are copied from it.
+const toRow = (doc: ContentDocument) => ({
+  slug: doc.id,
+  lang: doc.lang,
+  title: doc.name,
+  formatVersion: doc.formatVersion,
+  data: doc,
+})
+
 export const contentService = {
   list: () => repo.list(),
-  create: (input: ContentItemInput, authorId: string) => repo.create({ ...input, authorId }),
-  update: (id: string, input: ContentItemUpdate) => repo.update(id, input),
+  get: (id: string) => repo.get(id),
+  create: (doc: ContentDocument, authorId: string) => repo.create({ ...toRow(doc), authorId }),
+  replace: (id: string, doc: ContentDocument) => repo.replace(id, toRow(doc)),
   remove: (id: string) => repo.remove(id),
 }

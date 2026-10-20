@@ -1,4 +1,4 @@
-import { contentItemInputSchema, contentItemUpdateSchema } from '@kinotest/shared'
+import { contentDocumentSchema } from '@kinotest/shared'
 import { Router, type Request } from 'express'
 import { getAuth, requireAuth, requirePermission } from '../auth/middleware.ts'
 import { validate } from '../middleware.ts'
@@ -8,30 +8,50 @@ export const contentRouter = Router()
 
 contentRouter.use(requireAuth)
 
+// Summaries only (no `data`).
 contentRouter.get('/', requirePermission('content:read'), async (_req, res) => {
   res.json(await contentService.list())
+})
+
+contentRouter.get('/:id', requirePermission('content:read'), async (req: Request<{ id: string }>, res) => {
+  const item = await contentService.get(req.params.id)
+  if (!item) {
+    res.status(404).json({ error: 'Non atopado' })
+    return
+  }
+  res.json(item)
 })
 
 contentRouter.post(
   '/',
   requirePermission('content:manage'),
-  validate(contentItemInputSchema),
+  validate(contentDocumentSchema),
   async (req, res) => {
-    res.status(201).json(await contentService.create(req.body, getAuth(res).userId))
+    const result = await contentService.create(req.body, getAuth(res).userId)
+    if (result.status === 'conflict') {
+      res.status(409).json({ error: 'Xa existe un contido con ese id e idioma' })
+      return
+    }
+    res.status(201).json(result.item)
   },
 )
 
-contentRouter.patch(
+// Replaces the whole document.
+contentRouter.put(
   '/:id',
   requirePermission('content:manage'),
-  validate(contentItemUpdateSchema),
+  validate(contentDocumentSchema),
   async (req: Request<{ id: string }>, res) => {
-    const item = await contentService.update(req.params.id, req.body)
-    if (!item) {
+    const result = await contentService.replace(req.params.id, req.body)
+    if (result.status === 'not_found') {
       res.status(404).json({ error: 'Non atopado' })
       return
     }
-    res.json(item)
+    if (result.status === 'conflict') {
+      res.status(409).json({ error: 'Xa existe un contido con ese id e idioma' })
+      return
+    }
+    res.json(result.item)
   },
 )
 

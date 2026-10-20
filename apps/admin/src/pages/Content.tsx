@@ -1,35 +1,34 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
 import {
   IonBackButton,
   IonButton,
   IonButtons,
   IonContent,
   IonHeader,
-  IonInput,
   IonItem,
   IonLabel,
   IonList,
   IonPage,
   IonText,
-  IonTextarea,
   IonTitle,
   IonToolbar,
 } from '@ionic/react'
+import { contentDocumentSchema } from '@kinotest/shared'
 import {
   createContent,
   deleteContent,
   listContent,
-  updateContent,
-  type ContentItem,
+  replaceContent,
+  type ContentSummary,
 } from '../lib/content.ts'
 
 export default function Content() {
-  const [items, setItems] = useState<ContentItem[]>([])
-  const [editingId, setEditingId] = useState<string | null>(null)
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
+  const [items, setItems] = useState<ContentSummary[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const fileInput = useRef<HTMLInputElement>(null)
+  // Id of the document the next file will replace; null = import it as a new one.
+  const target = useRef<string | null>(null)
 
   const reload = useCallback(async () => {
     try {
@@ -43,17 +42,33 @@ export default function Content() {
     void reload()
   }, [reload])
 
-  const reset = () => {
-    setEditingId(null)
-    setTitle('')
-    setDescription('')
+  const pick = (id: string | null) => {
+    target.current = id
+    fileInput.current?.click()
   }
 
-  const run = async (fn: () => Promise<unknown>) => {
-    setBusy(true)
+  const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // lets the same file be picked again
+    if (!file) return
     setError(null)
+    let json: unknown
     try {
-      await fn()
+      json = JSON.parse(await file.text())
+    } catch {
+      setError('O ficheiro non é un JSON válido.')
+      return
+    }
+    const parsed = contentDocumentSchema.safeParse(json)
+    if (!parsed.success) {
+      const issue = parsed.error.issues[0]
+      setError(`Formato non válido (${issue?.path.map(String).join('.') || 'raíz'}): ${issue?.message}`)
+      return
+    }
+    setBusy(true)
+    try {
+      if (target.current) await replaceContent(target.current, parsed.data)
+      else await createContent(parsed.data)
       await reload()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro')
@@ -62,26 +77,18 @@ export default function Content() {
     }
   }
 
-  const submit = () =>
-    run(async () => {
-      const input = { title: title.trim(), description }
-      if (editingId) await updateContent(editingId, input)
-      else await createContent(input)
-      reset()
-    })
-
-  const edit = (item: ContentItem) => {
-    setEditingId(item.id)
-    setTitle(item.title)
-    setDescription(item.description)
-  }
-
-  const remove = (item: ContentItem) => {
+  const remove = async (item: ContentSummary) => {
     if (!window.confirm(`Borrar «${item.title}»?`)) return
-    void run(async () => {
+    setBusy(true)
+    setError(null)
+    try {
       await deleteContent(item.id)
-      if (editingId === item.id) reset()
-    })
+      await reload()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro')
+    } finally {
+      setBusy(false)
+    }
   }
 
   return (
@@ -95,39 +102,14 @@ export default function Content() {
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
-        <IonList>
-          <IonItem>
-            <IonInput
-              label="Título"
-              labelPlacement="stacked"
-              maxlength={200}
-              value={title}
-              onIonInput={(e) => setTitle(String(e.detail.value ?? ''))}
-            />
-          </IonItem>
-          <IonItem>
-            <IonTextarea
-              label="Descrición"
-              labelPlacement="stacked"
-              maxlength={5000}
-              autoGrow
-              value={description}
-              onIonInput={(e) => setDescription(String(e.detail.value ?? ''))}
-            />
-          </IonItem>
-        </IonList>
+        <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={onFile} />
+        <IonButton disabled={busy} onClick={() => pick(null)}>
+          Importar JSON
+        </IonButton>
         {error && (
           <IonText color="danger">
             <p>{error}</p>
           </IonText>
-        )}
-        <IonButton disabled={busy || !title.trim()} onClick={submit}>
-          {editingId ? 'Gardar' : 'Crear'}
-        </IonButton>
-        {editingId && (
-          <IonButton fill="outline" disabled={busy} onClick={reset}>
-            Cancelar
-          </IonButton>
         )}
 
         <IonList>
@@ -135,10 +117,12 @@ export default function Content() {
             <IonItem key={item.id}>
               <IonLabel className="ion-text-wrap">
                 <h2>{item.title}</h2>
-                {item.description && <p>{item.description}</p>}
+                <p>
+                  {item.slug} · {item.lang} · formato {item.formatVersion}
+                </p>
               </IonLabel>
-              <IonButton slot="end" fill="clear" disabled={busy} onClick={() => edit(item)}>
-                Editar
+              <IonButton slot="end" fill="clear" disabled={busy} onClick={() => pick(item.id)}>
+                Substituír
               </IonButton>
               <IonButton slot="end" fill="clear" color="danger" disabled={busy} onClick={() => remove(item)}>
                 Borrar

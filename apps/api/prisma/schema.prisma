@@ -47,14 +47,20 @@ model RefreshToken {
   @@index([userId])
 }
 
+// A content document (e.g. a remedy catalog). The whole JSON lives in `data`;
+// slug/lang/title/formatVersion are copied from it so they can be listed without loading it.
 model ContentItem {
-  id          String   @id @default(uuid())
-  title       String
-  description String   @default("")
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id])
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id            String   @id @default(uuid())
+  slug          String
+  lang          String
+  title         String
+  formatVersion Int      @default(1)
+  data          Json
+  authorId      String
+  author        User     @relation(fields: [authorId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
+  @@unique([slug, lang])
   @@index([authorId])
 }
