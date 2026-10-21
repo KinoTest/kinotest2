@@ -9,7 +9,10 @@ export const app = express()
 
 app.set('trust proxy', 1)
 app.use(cors({ origin: env.CORS_ORIGINS.split(',').map((o) => o.trim()) }))
-app.use(express.json({ limit: "2mb" }))
+// Content documents can weigh hundreds of KB, so only this route takes big bodies. It goes before
+// the global parser, which skips a body that is already parsed.
+app.use('/api/content', express.json({ limit: '2mb' }))
+app.use(express.json())
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' })

@@ -171,3 +171,12 @@ describe('DELETE /api/content/:id', () => {
     await api().delete(`/api/content/${item.id}`).set(auth).expect(404)
   })
 })
+
+describe('body size limit', () => {
+  it('only /api/content accepts large bodies', async () => {
+    await api()
+      .post('/api/auth/request-link')
+      .send({ email: 'a@test.com', pad: 'x'.repeat(150_000) })
+      .expect(413)
+  })
+})
