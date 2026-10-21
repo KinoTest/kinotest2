@@ -51,3 +51,11 @@ jobs:
       - run: npm ci
       - run: npm exec -w apps/api -- prisma generate
       - run: npm test -w apps/api
+  # Pull requests into main may only come from develop (a ruleset cannot restrict the source branch).
+  source-branch:
+    if: github.base_ref == 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: test "$HEAD_REF" = develop
