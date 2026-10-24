@@ -13,6 +13,11 @@ export interface ContentSummary {
   updatedAt: string
 }
 
+/** The whole stored document, as the API returns it. `data` is validated by the caller. */
+export interface ContentFull extends ContentSummary {
+  data: unknown
+}
+
 async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await authFetch(`/api/content${path}`, {
     ...init,
@@ -26,6 +31,8 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const listContent = (): Promise<ContentSummary[]> => request('')
+
+export const getContent = (id: string): Promise<ContentFull> => request(`/${id}`)
 
 export const createContent = (doc: ContentDocument): Promise<ContentSummary> =>
   request('', { method: 'POST', body: JSON.stringify(doc) })
