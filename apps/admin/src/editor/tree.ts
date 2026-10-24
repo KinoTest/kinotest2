@@ -21,7 +21,7 @@ export interface CatalogNode {
 export type TreeNode = CatalogNode | RemedyNode
 
 export interface EditorMeta {
-  slug: string
+  id: string
   lang: string
 }
 export interface EditorDoc {
@@ -53,7 +53,7 @@ export const newCatalog = (name = 'Novo contedor'): CatalogNode => ({
 })
 
 export const emptyDocument = (): EditorDoc => ({
-  meta: { slug: '', lang: 'es-ES' },
+  meta: { id: crypto.randomUUID(), lang: 'es-ES' },
   root: { id: ROOT_ID, type: 'catalog', name: '', notes: '', children: [] },
 })
 
@@ -65,7 +65,7 @@ const fromEntry = (e: Catalog | Remedy): TreeNode =>
     : { id: newId(), type: 'catalog', name: e.name, notes: e.notes ?? '', children: e.contents.map(fromEntry) }
 
 export const fromDocument = (doc: ContentDocument): EditorDoc => ({
-  meta: { slug: doc.id, lang: doc.lang },
+  meta: { id: doc.id, lang: doc.lang },
   root: {
     id: ROOT_ID,
     type: 'catalog',
@@ -82,7 +82,7 @@ const toEntry = (n: TreeNode): Catalog | Remedy =>
 
 /** Not validated: run it through `contentDocumentSchema` before saving. */
 export const toDocument = (ed: EditorDoc): ContentDocument => ({
-  id: ed.meta.slug,
+  id: ed.meta.id,
   lang: ed.meta.lang,
   formatVersion: CONTENT_FORMAT_VERSION,
   type: 'catalog',

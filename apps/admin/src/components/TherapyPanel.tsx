@@ -119,14 +119,6 @@ export default function TherapyPanel({ store }: { store: EditorStore }) {
         </label>
         <div className="form-row">
           <label className="field">
-            <span>Identificador</span>
-            <input
-              value={doc.meta.slug}
-              placeholder="p. ex. biomagneticPair"
-              onChange={(e) => exec(NO_HISTORY, cmdSetMeta(doc, 'slug', e.target.value))}
-            />
-          </label>
-          <label className="field">
             <span>Idioma</span>
             <input value={doc.meta.lang} placeholder="es-ES" onChange={(e) => exec(NO_HISTORY, cmdSetMeta(doc, 'lang', e.target.value))} />
           </label>

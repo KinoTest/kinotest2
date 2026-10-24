@@ -36,9 +36,10 @@ export const catalogSchema: z.ZodType<Catalog> = z.lazy(() =>
 )
 
 // Root of a content document (one stored row): a catalog with an identity.
-// `id` + `lang` identify it (e.g. "biomagneticPair" + "es-ES"); both are unique together.
+// `id` + `lang` identify it; both are unique together. The admin creates the `id` as a UUID when a therapy is
+// created; older readable ids (e.g. "biomagneticPair") are still valid.
 export const contentDocumentSchema = z.object({
-  id: z.string().regex(/^[A-Za-z][A-Za-z0-9-]{0,63}$/),
+  id: z.string().regex(/^[A-Za-z0-9][A-Za-z0-9-]{0,63}$/),
   lang: z.string().regex(/^[a-z]{2,3}(-[A-Z]{2})?$/),
   formatVersion: z.literal(CONTENT_FORMAT_VERSION).default(CONTENT_FORMAT_VERSION),
   type: z.literal('catalog'),
