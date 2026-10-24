@@ -20,6 +20,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
+          check-latest: true
           cache: npm
       - run: npm ci
       - run: npm run typecheck
@@ -48,6 +49,7 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
+          check-latest: true
           cache: npm
       - run: npm ci
       - run: npm exec -w apps/api -- prisma generate
