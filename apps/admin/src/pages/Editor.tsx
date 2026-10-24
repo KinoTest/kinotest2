@@ -190,7 +190,12 @@ function EditorView({ initial, serverId }: { initial: EditorDoc; serverId: strin
     setError(null)
     const result = await readContentFile(file)
     if ('error' in result) setError(result.error)
-    else store.exec(THERAPY, cmdReplaceAll(state.doc, fromDocument(result.doc)))
+    else {
+      const incoming = fromDocument(result.doc)
+      // The id is not shown in the editor: replacing the content of a saved therapy must not change its identity.
+      const next = serverId ? { ...incoming, meta: { ...incoming.meta, id: state.doc.meta.id } } : incoming
+      store.exec(THERAPY, cmdReplaceAll(state.doc, next))
+    }
   }
 
   return (

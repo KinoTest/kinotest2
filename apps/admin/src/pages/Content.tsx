@@ -88,7 +88,7 @@ export default function Content() {
               <IonLabel className="ion-text-wrap">
                 <h2>{item.title}</h2>
                 <p>
-                  {item.slug} · {item.lang} · formato {item.formatVersion}
+                  {item.lang} · formato {item.formatVersion}
                 </p>
               </IonLabel>
             </IonItem>

@@ -78,7 +78,7 @@ describe('conversion', () => {
     doc.root.notes = ''
     expect('notes' in toDocument(doc)).toBe(false)
     expect(doc.root.id).toBe(ROOT_ID)
-    expect(new Set(JSON.stringify(doc).match(/"id":"[^"]+"/g)).size).toBe(8)
+    expect(new Set(JSON.stringify(doc.root).match(/"id":"[^"]+"/g)).size).toBe(8)
   })
 })
 
