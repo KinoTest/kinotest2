@@ -3,6 +3,7 @@ import { IonReactRouter } from '@ionic/react-router'
 import { Navigate, Route } from 'react-router-dom'
 import RequireAuth from './components/RequireAuth.tsx'
 import Content from './pages/Content.tsx'
+import Editor from './pages/Editor.tsx'
 import Home from './pages/Home.tsx'
 import Login from './pages/Login.tsx'
 import Verify from './pages/Verify.tsx'
@@ -27,6 +28,22 @@ export default function App() {
             element={
               <RequireAuth>
                 <Content />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/content/new"
+            element={
+              <RequireAuth>
+                <Editor />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/content/:id/edit"
+            element={
+              <RequireAuth>
+                <Editor />
               </RequireAuth>
             }
           />

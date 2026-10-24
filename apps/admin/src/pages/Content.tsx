@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useCallback, useRef, useState, type ChangeEvent } from 'react'
 import {
   IonBackButton,
   IonButton,
@@ -12,23 +12,16 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  useIonViewWillEnter,
 } from '@ionic/react'
-import { contentDocumentSchema } from '@kinotest/shared'
-import {
-  createContent,
-  deleteContent,
-  listContent,
-  replaceContent,
-  type ContentSummary,
-} from '../lib/content.ts'
+import { createContent, listContent, type ContentSummary } from '../lib/content.ts'
+import { readContentFile } from '../lib/importFile.ts'
 
 export default function Content() {
   const [items, setItems] = useState<ContentSummary[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
-  // Id of the document the next file will replace; null = import it as a new one.
-  const target = useRef<string | null>(null)
 
   const reload = useCallback(async () => {
     try {
@@ -38,51 +31,25 @@ export default function Content() {
     }
   }, [])
 
-  useEffect(() => {
+  // Also when coming back from the editor: the list may have changed.
+  useIonViewWillEnter(() => {
     void reload()
-  }, [reload])
+  })
 
-  const pick = (id: string | null) => {
-    target.current = id
-    fileInput.current?.click()
-  }
-
+  // Imports a JSON file as a new therapy. Replacing or deleting one is done from its editor.
   const onFile = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     e.target.value = '' // lets the same file be picked again
     if (!file) return
     setError(null)
-    let json: unknown
-    try {
-      json = JSON.parse(await file.text())
-    } catch {
-      setError('O ficheiro non é un JSON válido.')
-      return
-    }
-    const parsed = contentDocumentSchema.safeParse(json)
-    if (!parsed.success) {
-      const issue = parsed.error.issues[0]
-      setError(`Formato non válido (${issue?.path.map(String).join('.') || 'raíz'}): ${issue?.message}`)
+    const result = await readContentFile(file)
+    if ('error' in result) {
+      setError(result.error)
       return
     }
     setBusy(true)
     try {
-      if (target.current) await replaceContent(target.current, parsed.data)
-      else await createContent(parsed.data)
-      await reload()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro')
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  const remove = async (item: ContentSummary) => {
-    if (!window.confirm(`Borrar «${item.title}»?`)) return
-    setBusy(true)
-    setError(null)
-    try {
-      await deleteContent(item.id)
+      await createContent(result.doc)
       await reload()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro')
@@ -103,7 +70,10 @@ export default function Content() {
       </IonHeader>
       <IonContent className="ion-padding">
         <input ref={fileInput} type="file" accept="application/json,.json" hidden onChange={onFile} />
-        <IonButton disabled={busy} onClick={() => pick(null)}>
+        <IonButton routerLink="/content/new" disabled={busy}>
+          Nova terapia
+        </IonButton>
+        <IonButton fill="outline" disabled={busy} onClick={() => fileInput.current?.click()}>
           Importar JSON
         </IonButton>
         {error && (
@@ -114,19 +84,13 @@ export default function Content() {
 
         <IonList>
           {items.map((item) => (
-            <IonItem key={item.id}>
+            <IonItem key={item.id} button detail routerLink={`/content/${item.id}/edit`}>
               <IonLabel className="ion-text-wrap">
                 <h2>{item.title}</h2>
                 <p>
                   {item.slug} · {item.lang} · formato {item.formatVersion}
                 </p>
               </IonLabel>
-              <IonButton slot="end" fill="clear" disabled={busy} onClick={() => pick(item.id)}>
-                Substituír
-              </IonButton>
-              <IonButton slot="end" fill="clear" color="danger" disabled={busy} onClick={() => remove(item)}>
-                Borrar
-              </IonButton>
             </IonItem>
           ))}
           {items.length === 0 && (
