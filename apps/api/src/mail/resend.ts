@@ -12,6 +12,9 @@ export class ResendMailer implements Mailer {
 
   async send(msg: MailMessage): Promise<void> {
     const { error } = await this.client.emails.send({ from: this.from, ...msg })
-    if (error) throw new Error(`Resend: ${error.message}`)
+    if (error) {
+      console.error('[mail] Resend error:', error)
+      throw new Error(`Resend: ${error.message}`)
+    }
   }
 }
