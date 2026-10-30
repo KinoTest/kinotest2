@@ -15,6 +15,24 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+  # S3-compatible storage for images (stands in for Cloudflare R2). Local dev credentials only.
+  # After `up`, run once: node scripts/dev-storage.mjs (public read + CORS).
+  garage:
+    image: docker.io/dxflrs/garage:v2.5.0
+    command: ["/garage", "server", "--single-node", "--default-bucket"]
+    environment:
+      GARAGE_DEFAULT_ACCESS_KEY: GK0123456789abcdef0123456789abcdef
+      GARAGE_DEFAULT_SECRET_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      GARAGE_DEFAULT_BUCKET: kinotest-dev
+    ports:
+      - "3900:3900" # S3 API
+      - "3902:3902" # public web endpoint (bucket website mode)
+    volumes:
+      - ./scripts/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
 
 volumes:
   db-data:
+  garage-meta:
+  garage-data:

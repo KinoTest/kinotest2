@@ -1,4 +1,4 @@
-import type { ContentDocument } from '@kinotest/shared'
+import type { ContentDocument, PresignResponse } from '@kinotest/shared'
 import { ApiError, authFetch } from './session.ts'
 
 /** What the listing returns: the document without its `data`. */
@@ -42,3 +42,7 @@ export const replaceContent = (id: string, doc: ContentDocument): Promise<Conten
   request(`/${id}`, { method: 'PUT', body: JSON.stringify(doc) })
 
 export const deleteContent = (id: string): Promise<void> => request(`/${id}`, { method: 'DELETE' })
+
+/** Asks for a presigned upload URL (none if the image is already in the bucket). */
+export const presignImage = (contentId: string, hash: string): Promise<PresignResponse> =>
+  request('/images/presign', { method: 'POST', body: JSON.stringify({ contentId, hash }) })

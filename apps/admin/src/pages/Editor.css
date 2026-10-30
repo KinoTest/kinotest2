@@ -218,11 +218,6 @@
   object-fit: cover;
   border-radius: 6px;
 }
-.image-list code {
-  display: block;
-  font-size: 0.7rem;
-  word-break: break-all;
-}
 
 .md-visual {
   min-height: 260px;
@@ -237,4 +232,39 @@
 }
 .md-toolbar button.is-active {
   background: var(--editor-line);
+}
+
+.image-list li {
+  display: flex;
+  flex-direction: column;
+}
+.image-actions {
+  display: flex;
+  gap: 2px;
+  margin-top: 4px;
+}
+.image-actions button,
+.image-add button {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--editor-line);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.image-actions button:disabled,
+.image-add button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.image-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.field-error {
+  margin: 0;
+  color: var(--ion-color-danger, #eb445a);
 }
