@@ -3,10 +3,8 @@ import { addOutline } from 'ionicons/icons'
 import { NO_HISTORY, THERAPY } from '../editor/state.ts'
 import { cmdInsert, cmdSetField, getNode, newRemedy } from '../editor/tree.ts'
 import type { EditorStore } from '../editor/useEditorStore.ts'
+import ImageManager from './ImageManager.tsx'
 import MarkdownEditor from './MarkdownEditor.tsx'
-
-// Public base URL of the image bucket (see DECISIONS.md). Without it the images are listed by key only.
-const MEDIA_URL = (import.meta.env.VITE_MEDIA_URL as string | undefined)?.replace(/\/$/, '')
 
 export default function RemedyPanel({ store }: { store: EditorStore }) {
   const { state, exec } = store
@@ -53,22 +51,7 @@ export default function RemedyPanel({ store }: { store: EditorStore }) {
                 onChange={(value) => exec(NO_HISTORY, cmdSetField(doc, remedy.id, 'description', value))}
               />
             </div>
-            <div className="field">
-              <span>Imaxes ({remedy.images.length})</span>
-              {remedy.images.length === 0 ? (
-                <p className="muted">Este remedio non ten imaxes.</p>
-              ) : (
-                <ul className="image-list">
-                  {remedy.images.map((key) => (
-                    <li key={key}>
-                      {MEDIA_URL && <img src={`${MEDIA_URL}/${key}`} alt="" loading="lazy" />}
-                      <code>{key}</code>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <p className="muted">Engadir, substituír e reordenar imaxes chegará coa parte 2 (almacenamento en R2).</p>
-            </div>
+            <ImageManager store={store} remedy={remedy} contentId={doc.meta.id} />
           </>
         )}
       </div>

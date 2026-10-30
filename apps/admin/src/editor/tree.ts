@@ -148,6 +148,8 @@ export type Field = 'name' | 'description' | 'notes'
 
 export type Cmd =
   | { kind: 'setField'; id: string; field: Field; before: string; after: string }
+  /** Replaces the image keys of a remedy (add, remove, replace and reorder all come down to this). */
+  | { kind: 'setImages'; id: string; before: string[]; after: string[] }
   | { kind: 'setMeta'; field: keyof EditorMeta; before: string; after: string }
   /** The whole therapy is swapped (importing a file into the editor). */
   | { kind: 'replaceAll'; before: EditorDoc; after: EditorDoc }
@@ -160,6 +162,8 @@ export function invert(c: Cmd): Cmd {
   switch (c.kind) {
     case 'setField':
     case 'setMeta':
+      return { ...c, before: c.after, after: c.before }
+    case 'setImages':
       return { ...c, before: c.after, after: c.before }
     case 'replaceAll':
       return { kind: 'replaceAll', before: c.after, after: c.before }
@@ -207,6 +211,12 @@ export function apply(doc: EditorDoc, c: Cmd): EditorDoc | null {
       if (c.field === 'description' && node.type !== 'remedy') return null
       if (c.field === 'notes' && node.type !== 'catalog') return null
       const root = updateCatalog(doc.root, ROOT_ID, (r) => mapNode(r, c.id, (n) => ({ ...n, [c.field]: c.after })) as CatalogNode)
+      return { ...doc, root }
+    }
+    case 'setImages': {
+      const node = getNode(doc.root, c.id)
+      if (!node || node.type !== 'remedy') return null
+      const root = updateCatalog(doc.root, ROOT_ID, (r) => mapNode(r, c.id, (n) => ({ ...n, images: c.after })) as CatalogNode)
       return { ...doc, root }
     }
     case 'insert': {
@@ -265,6 +275,13 @@ export function cmdSetField(doc: EditorDoc, id: string, field: Field, after: str
   if (!node) return null
   const before = field === 'name' ? node.name : field === 'description' ? (node.type === 'remedy' ? node.description : null) : node.type === 'catalog' ? node.notes : null
   return before === null || before === after ? null : { kind: 'setField', id, field, before, after }
+}
+
+export function cmdSetImages(doc: EditorDoc, id: string, after: string[]): Cmd | null {
+  const node = getNode(doc.root, id)
+  if (!node || node.type !== 'remedy') return null
+  const same = node.images.length === after.length && node.images.every((k, i) => k === after[i])
+  return same ? null : { kind: 'setImages', id, before: node.images, after }
 }
 
 export const cmdReplaceAll = (doc: EditorDoc, next: EditorDoc): Cmd => ({ kind: 'replaceAll', before: doc, after: next })

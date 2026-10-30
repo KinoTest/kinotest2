@@ -1,7 +1,8 @@
-import { contentDocumentSchema } from '@kinotest/shared'
+import { contentDocumentSchema, IMAGE_CONTENT_TYPE, presignRequestSchema, type PresignResponse } from '@kinotest/shared'
 import { Router, type Request } from 'express'
 import { getAuth, requireAuth, requirePermission } from '../auth/middleware.ts'
 import { validate } from '../middleware.ts'
+import { buildImageKey, imageStore } from '../media/index.ts'
 import { contentService } from './service.ts'
 
 export const contentRouter = Router()
@@ -21,6 +22,24 @@ contentRouter.get('/:id', requirePermission('content:read'), async (req: Request
   }
   res.json(item)
 })
+
+// Presigned upload for an image: the browser PUTs the WebP straight to the bucket. The key is
+// content-addressed, so an existing object is never uploaded twice.
+contentRouter.post(
+  '/images/presign',
+  requirePermission('content:manage'),
+  validate(presignRequestSchema),
+  async (req, res) => {
+    const { contentId, hash } = req.body as { contentId: string; hash: string }
+    const key = buildImageKey(contentId, hash)
+    if (await imageStore.exists(key)) {
+      res.json({ key, exists: true } satisfies PresignResponse)
+      return
+    }
+    const uploadUrl = await imageStore.createUploadUrl(key, IMAGE_CONTENT_TYPE)
+    res.json({ key, exists: false, uploadUrl } satisfies PresignResponse)
+  },
+)
 
 contentRouter.post(
   '/',
