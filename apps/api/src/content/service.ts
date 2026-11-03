@@ -1,9 +1,9 @@
 import type { ContentDocument } from '@kinotest/shared'
 import { contentRepository as repo } from './repository.ts'
 
-// The document is the unit of storage: slug, lang and title are copied from it.
+// The document is the unit of storage: contentId, lang and title are copied from it.
 const toRow = (doc: ContentDocument) => ({
-  slug: doc.id,
+  contentId: doc.id,
   lang: doc.lang,
   title: doc.name,
   formatVersion: doc.formatVersion,

@@ -14,6 +14,8 @@ export default defineConfig({
       CORS_ORIGINS: 'http://localhost:5173',
       OWNER_EMAIL: 'owner@test.com',
       MAIL_PROVIDER: 'memory',
+      // Always the in-memory store: the tests must not depend on the developer's local .env (Garage/R2).
+      IMAGE_STORE: 'memory',
       LINK_RATE_LIMIT_PER_IP: '100000',
     },
   },

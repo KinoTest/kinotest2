@@ -74,9 +74,18 @@ contentRouter.put(
   },
 )
 
+// 409 while therapists still have it assigned: unassign it first.
 contentRouter.delete('/:id', requirePermission('content:manage'), async (req: Request<{ id: string }>, res) => {
-  if (!(await contentService.remove(req.params.id))) {
+  const result = await contentService.remove(req.params.id)
+  if (result.status === 'not_found') {
     res.status(404).json({ error: 'Non atopado' })
+    return
+  }
+  if (result.status === 'assigned') {
+    res.status(409).json({
+      error: `Non se pode borrar: a terapia está asignada a ${result.count} terapeuta(s)`,
+      assignments: result.count,
+    })
     return
   }
   res.status(204).end()

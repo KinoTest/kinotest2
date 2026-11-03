@@ -1,9 +1,12 @@
 import cors from 'cors'
 import express from 'express'
 import type { NextFunction, Request, Response } from 'express'
+import { assignmentsRouter } from './assignments/routes.ts'
 import { authRouter } from './auth/routes.ts'
 import { env } from './env.ts'
 import { contentRouter } from './content/routes.ts'
+import { meRouter } from './me/routes.ts'
+import { usersRouter } from './users/routes.ts'
 
 export const app = express()
 
@@ -19,6 +22,9 @@ app.get('/health', (_req, res) => {
 })
 app.use('/api/auth', authRouter)
 app.use('/api/content', contentRouter)
+app.use('/api/assignments', assignmentsRouter)
+app.use('/api/users', usersRouter)
+app.use('/api/me', meRouter)
 
 // Must be last and keep the 4 parameters so Express treats it as an error handler.
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {

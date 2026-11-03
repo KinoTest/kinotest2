@@ -2,7 +2,7 @@ import type { ContentDocument } from '@kinotest/shared'
 import { prisma } from '../db.ts'
 
 type Row = {
-  slug: string
+  contentId: string
   lang: string
   title: string
   formatVersion: number
@@ -12,7 +12,7 @@ type Row = {
 // Listings skip `data`: a document can weigh hundreds of KB.
 const summary = {
   id: true,
-  slug: true,
+  contentId: true,
   lang: true,
   title: true,
   formatVersion: true,
@@ -31,7 +31,7 @@ export const contentRepository = {
 
   async create(row: Row & { authorId: string }) {
     const clash = await prisma.contentItem.findUnique({
-      where: { slug_lang: { slug: row.slug, lang: row.lang } },
+      where: { contentId_lang: { contentId: row.contentId, lang: row.lang } },
       select: { id: true },
     })
     if (clash) return { status: 'conflict' } as const
@@ -43,16 +43,28 @@ export const contentRepository = {
     const current = await prisma.contentItem.findUnique({ where: { id }, select: { id: true } })
     if (!current) return { status: 'not_found' } as const
     const clash = await prisma.contentItem.findFirst({
-      where: { slug: row.slug, lang: row.lang, NOT: { id } },
+      where: { contentId: row.contentId, lang: row.lang, NOT: { id } },
       select: { id: true },
     })
     if (clash) return { status: 'conflict' } as const
     return { status: 'ok', item: await prisma.contentItem.update({ where: { id }, data: toData(row) }) } as const
   },
 
-  /** Returns true if something was deleted. */
-  async remove(id: string): Promise<boolean> {
-    const { count } = await prisma.contentItem.deleteMany({ where: { id } })
-    return count > 0
+  /** Refuses to delete an item that therapists still have assigned. */
+  async remove(id: string) {
+    const item = await prisma.contentItem.findUnique({
+      where: { id },
+      select: { _count: { select: { assignments: true } } },
+    })
+    if (!item) return { status: 'not_found' } as const
+    if (item._count.assignments > 0) return { status: 'assigned', count: item._count.assignments } as const
+    try {
+      await prisma.contentItem.delete({ where: { id } })
+    } catch (error) {
+      // Assigned between the check and the delete: the foreign key (RESTRICT) stops it.
+      if ((error as { code?: string }).code === 'P2003') return { status: 'assigned', count: 1 } as const
+      throw error
+    }
+    return { status: 'ok' } as const
   },
 }

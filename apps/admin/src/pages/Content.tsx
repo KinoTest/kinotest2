@@ -12,6 +12,7 @@ import {
   IonText,
   IonTitle,
   IonToolbar,
+  useIonRouter,
   useIonViewWillEnter,
 } from '@ionic/react'
 import { createContent, listContent, type ContentSummary } from '../lib/content.ts'
@@ -22,6 +23,7 @@ export default function Content() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const fileInput = useRef<HTMLInputElement>(null)
+  const router = useIonRouter()
 
   const reload = useCallback(async () => {
     try {
@@ -91,6 +93,17 @@ export default function Content() {
                   {item.lang} · formato {item.formatVersion}
                 </p>
               </IonLabel>
+              <IonButton
+                slot="end"
+                fill="outline"
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation() // the row itself opens the editor
+                  router.push(`/content/${item.id}/assignments`)
+                }}
+              >
+                Terapeutas
+              </IonButton>
             </IonItem>
           ))}
           {items.length === 0 && (

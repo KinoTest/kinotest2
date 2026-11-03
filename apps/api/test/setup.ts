@@ -9,7 +9,7 @@ assertTestDatabase(env.DATABASE_URL)
 beforeEach(async () => {
   outbox.length = 0
   await prisma.$executeRawUnsafe(
-    'TRUNCATE "User","LoginToken","RefreshToken","ContentItem" CASCADE',
+    'TRUNCATE "User","LoginToken","RefreshToken","ContentItem","TherapyAssignment" CASCADE',
   )
 })
 
