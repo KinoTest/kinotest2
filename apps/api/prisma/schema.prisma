@@ -14,13 +14,15 @@ enum Role {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  email         String         @unique
-  role          Role           @default(user)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  contentItems  ContentItem[]
-  refreshTokens RefreshToken[]
+  id              String              @id @default(uuid())
+  email           String              @unique
+  role            Role                @default(user)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  contentItems    ContentItem[]
+  refreshTokens   RefreshToken[]
+  assignments     TherapyAssignment[] @relation("AssignedTo")
+  assignmentsMade TherapyAssignment[] @relation("AssignedBy")
 }
 
 // Magic-link token (single use). Only the hash is stored. The user is created on verify.
@@ -48,10 +50,10 @@ model RefreshToken {
 }
 
 // A content document (e.g. a remedy catalog). The whole JSON lives in `data`;
-// slug/lang/title/formatVersion are copied from it so they can be listed without loading it.
+// contentId/lang/title/formatVersion are copied from it so they can be listed without loading it.
 model ContentItem {
   id            String   @id @default(uuid())
-  slug          String
+  contentId     String
   lang          String
   title         String
   formatVersion Int      @default(1)
@@ -61,6 +63,30 @@ model ContentItem {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  @@unique([slug, lang])
+  assignments   TherapyAssignment[]
+
+  @@unique([contentId, lang])
   @@index([authorId])
+}
+
+// A therapy (one ContentItem row, i.e. one language) assigned to a therapist (User) by the owner.
+// A therapy that still has assignments cannot be deleted (RESTRICT, and a 409 from the API).
+model TherapyAssignment {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation("AssignedTo", fields: [userId], references: [id], onDelete: Cascade)
+  contentItemId String
+  contentItem   ContentItem @relation(fields: [contentItemId], references: [id], onDelete: Restrict)
+  assignedById  String
+  assignedBy    User        @relation("AssignedBy", fields: [assignedById], references: [id], onDelete: Restrict)
+  expiresAt     DateTime?
+  note          String?
+  // Price charged to the therapist, informational, in EUR.
+  amount        Decimal?    @db.Decimal(10, 2)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  @@unique([userId, contentItemId])
+  @@index([contentItemId])
+  @@index([assignedById])
 }

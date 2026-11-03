@@ -4,15 +4,17 @@ import { describe, expect, it } from 'vitest'
 import { hashToken, newToken, signAccess, verifyAccess } from '../src/auth/tokens.ts'
 
 describe('roles', () => {
-  it('user can read but not manage', () => {
-    expect(can('user', 'content:read')).toBe(true)
+  it('user has no direct content or user permissions', () => {
+    expect(can('user', 'content:read')).toBe(false)
     expect(can('user', 'content:manage')).toBe(false)
     expect(can('user', 'users:manage')).toBe(false)
+    expect(can('user', 'assignments:manage')).toBe(false)
   })
 
   it('owner has every permission any role has', () => {
     for (const p of rolePermissions.user) expect(can('owner', p)).toBe(true)
     expect(can('owner', 'users:manage')).toBe(true)
+    expect(can('owner', 'assignments:manage')).toBe(true)
   })
 })
 

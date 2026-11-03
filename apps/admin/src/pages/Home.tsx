@@ -23,6 +23,7 @@ export default function Home() {
         API status: {api}
         <div>
           <IonButton routerLink="/content">Contidos</IonButton>
+          <IonButton routerLink="/therapists">Terapeutas</IonButton>
           <IonButton fill="outline" onClick={logout}>
             Saír
           </IonButton>

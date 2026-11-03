@@ -29,7 +29,7 @@ const createItem = (authorId: string, over: Record<string, unknown> = {}, create
   const d = doc(over)
   return prisma.contentItem.create({
     data: {
-      slug: d.id as string,
+      contentId: d.id as string,
       lang: d.lang as string,
       title: d.name as string,
       data: { ...d, formatVersion: 1 } as never,
@@ -50,9 +50,14 @@ describe('authentication', () => {
 })
 
 describe('GET /api/content', () => {
-  it('a normal user can list', async () => {
+  it('a normal user cannot list (403)', async () => {
     const user = await asUser()
-    const res = await api().get('/api/content').set(bearer(user.accessToken)).expect(200)
+    await api().get('/api/content').set(bearer(user.accessToken)).expect(403)
+  })
+
+  it('the owner gets an empty list when there is nothing', async () => {
+    const owner = await asOwner()
+    const res = await api().get('/api/content').set(bearer(owner.accessToken)).expect(200)
     expect(res.body).toEqual([])
   })
 
@@ -62,7 +67,7 @@ describe('GET /api/content', () => {
     await createItem(owner.user.id, { id: 'new', name: 'new' }, new Date('2026-06-01'))
     const res = await api().get('/api/content').set(bearer(owner.accessToken)).expect(200)
     expect(res.body.map((i: { title: string }) => i.title)).toEqual(['new', 'old'])
-    expect(res.body[0]).toMatchObject({ slug: 'new', lang: 'es-ES', formatVersion: 1 })
+    expect(res.body[0]).toMatchObject({ contentId: 'new', lang: 'es-ES', formatVersion: 1 })
     expect(res.body[0]).not.toHaveProperty('data')
   })
 })
@@ -70,21 +75,23 @@ describe('GET /api/content', () => {
 describe('GET /api/content/:id', () => {
   it('returns the whole document, 404 if unknown', async () => {
     const owner = await asOwner()
-    const user = await asUser()
     const item = await createItem(owner.user.id)
-    const res = await api().get(`/api/content/${item.id}`).set(bearer(user.accessToken)).expect(200)
+    const auth = bearer(owner.accessToken)
+    const res = await api().get(`/api/content/${item.id}`).set(auth).expect(200)
     expect(res.body.data.contents[0].contents[0].name).toBe('Lunar / Riñón homolateral')
-    await api().get('/api/content/does-not-exist').set(bearer(user.accessToken)).expect(404)
+    await api().get('/api/content/does-not-exist').set(auth).expect(404)
   })
 })
 
 describe('permissions (403 for a normal user)', () => {
-  it('cannot create, replace or delete', async () => {
+  it('cannot read, create, replace or delete', async () => {
     const owner = await asOwner()
     const user = await asUser()
     const item = await createItem(owner.user.id)
     const auth = bearer(user.accessToken)
 
+    await api().get('/api/content').set(auth).expect(403)
+    await api().get(`/api/content/${item.id}`).set(auth).expect(403)
     await api().post('/api/content').set(auth).send(doc({ id: 'other' })).expect(403)
     await api().put(`/api/content/${item.id}`).set(auth).send(doc()).expect(403)
     await api().delete(`/api/content/${item.id}`).set(auth).expect(403)
@@ -93,11 +100,11 @@ describe('permissions (403 for a normal user)', () => {
 })
 
 describe('POST /api/content', () => {
-  it('the owner creates a document; slug, lang and title come from it', async () => {
+  it('the owner creates a document; contentId, lang and title come from it', async () => {
     const owner = await asOwner()
     const res = await api().post('/api/content').set(bearer(owner.accessToken)).send(doc()).expect(201)
     expect(res.body).toMatchObject({
-      slug: 'biomagneticPair',
+      contentId: 'biomagneticPair',
       lang: 'es-ES',
       title: 'Par Biomagnético',
       formatVersion: 1,
@@ -169,6 +176,21 @@ describe('DELETE /api/content/:id', () => {
     await api().delete(`/api/content/${item.id}`).set(auth).expect(204)
     expect(await prisma.contentItem.count()).toBe(0)
     await api().delete(`/api/content/${item.id}`).set(auth).expect(404)
+  })
+
+  it('409 while therapists have it assigned; allowed once unassigned', async () => {
+    const owner = await asOwner()
+    const user = await asUser()
+    const item = await createItem(owner.user.id)
+    const assignment = await prisma.therapyAssignment.create({
+      data: { userId: user.user.id, contentItemId: item.id, assignedById: owner.user.id },
+    })
+    const auth = bearer(owner.accessToken)
+    const res = await api().delete(`/api/content/${item.id}`).set(auth).expect(409)
+    expect(res.body.assignments).toBe(1)
+    expect(await prisma.contentItem.count()).toBe(1)
+    await prisma.therapyAssignment.delete({ where: { id: assignment.id } })
+    await api().delete(`/api/content/${item.id}`).set(auth).expect(204)
   })
 })
 

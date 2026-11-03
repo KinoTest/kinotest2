@@ -4,7 +4,7 @@ import { ApiError, authFetch } from './session.ts'
 /** What the listing returns: the document without its `data`. */
 export interface ContentSummary {
   id: string
-  slug: string
+  contentId: string
   lang: string
   title: string
   formatVersion: number

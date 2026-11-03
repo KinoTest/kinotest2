@@ -24,7 +24,7 @@ afterEach(() => {
 })
 
 const row = {
-  id: 'abc', slug: 'p', lang: 'es-ES', title: 'Par', formatVersion: 1, authorId: 'u', createdAt: '', updatedAt: '',
+  id: 'abc', contentId: 'p', lang: 'es-ES', title: 'Par', formatVersion: 1, authorId: 'u', createdAt: '', updatedAt: '',
   data: { id: 'p', lang: 'es-ES', formatVersion: 1, type: 'catalog', name: 'Par', contents: [] },
 }
 
