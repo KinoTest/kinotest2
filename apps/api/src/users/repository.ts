@@ -4,6 +4,7 @@ const select = {
   id: true,
   email: true,
   role: true,
+  confirmedAt: true,
   createdAt: true,
   _count: { select: { assignments: true } },
 } as const

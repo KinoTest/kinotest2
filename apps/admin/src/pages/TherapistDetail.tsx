@@ -22,6 +22,7 @@ import {
   deleteAssignments,
   getUser,
   listAssignments,
+  resendInvitations,
   type AssignmentRow,
   type UserSummary,
 } from '../lib/assignments.ts'
@@ -34,6 +35,7 @@ export default function TherapistDetail() {
   const [error, setError] = useState<string | null>(null)
   const [assigning, setAssigning] = useState(false)
   const [editing, setEditing] = useState<AssignmentRow | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
   const reload = useCallback(async () => {
     try {
@@ -60,6 +62,16 @@ export default function TherapistDetail() {
     }
   }
 
+  const resend = async () => {
+    try {
+      const result = await resendInvitations([id])
+      setNotice(result.failed.length > 0 ? 'Non se puido enviar o convite. Téntao de novo.' : 'Convite reenviado.')
+      setError(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro')
+    }
+  }
+
   const done = () => {
     setAssigning(false)
     setEditing(null)
@@ -80,6 +92,21 @@ export default function TherapistDetail() {
         <IonButton disabled={!user} onClick={() => setAssigning(true)}>
           Asignar terapias
         </IonButton>
+        {user && !user.confirmedAt && (
+          <>
+            <IonButton fill="outline" onClick={() => void resend()}>
+              Reenviar convite
+            </IonButton>
+            <IonText color="medium">
+              <p>Conta sen confirmar: aínda non entrou co enlace do convite.</p>
+            </IonText>
+          </>
+        )}
+        {notice && (
+          <IonText color="medium">
+            <p>{notice}</p>
+          </IonText>
+        )}
         {error && (
           <IonText color="danger">
             <p>{error}</p>

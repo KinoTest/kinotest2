@@ -98,7 +98,10 @@ export default function Content() {
                 fill="outline"
                 size="small"
                 onClick={(e) => {
-                  e.stopPropagation() // the row itself opens the editor
+                  // The row is a link (<a href>) and this button sits inside it: without preventDefault the
+                  // browser follows the row's href (the editor) even though the click is stopped here.
+                  e.preventDefault()
+                  e.stopPropagation()
                   router.push(`/content/${item.id}/assignments`)
                 }}
               >

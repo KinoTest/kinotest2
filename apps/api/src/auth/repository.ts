@@ -18,8 +18,17 @@ export const authRepository = {
     return count === 1 ? token.email : null
   },
 
-  findOrCreateUser: (email: string, role: 'owner' | 'user') =>
-    prisma.user.upsert({ where: { email }, update: {}, create: { email, role } }),
+  /** Verifying a link confirms the account (invited accounts are created unconfirmed). */
+  async findOrCreateUser(email: string, role: 'owner' | 'user') {
+    const now = new Date()
+    const user = await prisma.user.upsert({
+      where: { email },
+      update: {},
+      create: { email, role, confirmedAt: now },
+    })
+    if (user.confirmedAt) return user
+    return prisma.user.update({ where: { id: user.id }, data: { confirmedAt: now } })
+  },
 
   findUserById: (id: string) => prisma.user.findUnique({ where: { id } }),
 

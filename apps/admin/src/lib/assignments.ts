@@ -1,4 +1,4 @@
-import type { AssignmentPatch, CreateAssignments, DeleteAssignments, Role } from '@kinotest/shared'
+import type { AssignmentPatch, CreateAssignmentsInput, DeleteAssignments, Role } from '@kinotest/shared'
 import { ApiError, authFetch } from './session.ts'
 
 /** A therapist (a registered user), as `GET /api/users` returns it. */
@@ -6,6 +6,8 @@ export interface UserSummary {
   id: string
   email: string
   role: Role
+  /** null = account created by the owner (invited) and not confirmed yet. */
+  confirmedAt: string | null
   createdAt: string
   assignmentCount: number
 }
@@ -50,9 +52,22 @@ export function listAssignments(filter: { userId?: string; contentItemId?: strin
   return request(`/api/assignments?${query}`)
 }
 
-/** Every therapist x every therapy; pairs that already exist are skipped. */
-export const createAssignments = (input: CreateAssignments): Promise<{ created: number; skipped: number }> =>
+export interface CreateAssignmentsResult {
+  created: number
+  skipped: number
+  /** New accounts (from `emails`) that were created and invited. */
+  invited: string[]
+  /** New accounts whose invitation email failed (the assignment is kept; resend it). */
+  inviteFailed: string[]
+}
+
+/** Every therapist (by id or email) x every therapy; pairs that already exist are skipped. */
+export const createAssignments = (input: CreateAssignmentsInput): Promise<CreateAssignmentsResult> =>
   request('/api/assignments', { method: 'POST', body: JSON.stringify(input) })
+
+/** Resends the invitation to the unconfirmed accounts among `userIds`. */
+export const resendInvitations = (userIds: string[]): Promise<{ invited: string[]; failed: string[] }> =>
+  request('/api/assignments/invitations', { method: 'POST', body: JSON.stringify({ userIds }) })
 
 export const deleteAssignments = (input: DeleteAssignments): Promise<{ deleted: number }> =>
   request('/api/assignments', { method: 'DELETE', body: JSON.stringify(input) })

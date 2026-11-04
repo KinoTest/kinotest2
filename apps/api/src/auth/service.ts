@@ -6,6 +6,7 @@ import { hashToken, newToken, signAccess } from './tokens.ts'
 
 const LINK_TTL_MS = 15 * 60 * 1000
 const REFRESH_TTL_MS = 30 * 24 * 60 * 60 * 1000
+const INVITE_TTL_MS = 7 * 24 * 60 * 60 * 1000
 const MAX_LINKS_PER_WINDOW = 3
 
 export class AuthError extends Error {
@@ -14,6 +15,20 @@ export class AuthError extends Error {
     super(message)
     this.status = status
   }
+}
+
+/** The OWNER_EMAIL account is the owner; everybody else is a user. */
+export const roleForEmail = (email: string): 'owner' | 'user' =>
+  !!env.OWNER_EMAIL && email === env.OWNER_EMAIL.toLowerCase() ? 'owner' : 'user'
+
+async function createLoginLink(email: string, ttlMs: number): Promise<string> {
+  const token = newToken()
+  await repo.createLoginToken({
+    tokenHash: hashToken(token),
+    email,
+    expiresAt: new Date(Date.now() + ttlMs),
+  })
+  return `${env.APP_URL}/auth/verify?token=${token}`
 }
 
 const toAuthUser = (u: { id: string; email: string; role: 'owner' | 'user' }): AuthUser => ({
@@ -35,17 +50,10 @@ async function issueSession(user: AuthUser): Promise<Session> {
 export const authService = {
   /** Always resolves the same way whether or not the email exists, and never creates users. */
   async requestLink(email: string): Promise<void> {
-    const now = Date.now()
-    const recent = await repo.countRecentLoginTokens(email, new Date(now - LINK_TTL_MS))
+    const recent = await repo.countRecentLoginTokens(email, new Date(Date.now() - LINK_TTL_MS))
     if (recent >= MAX_LINKS_PER_WINDOW) return // silently ignored: anti-abuse
 
-    const token = newToken()
-    await repo.createLoginToken({
-      tokenHash: hashToken(token),
-      email,
-      expiresAt: new Date(now + LINK_TTL_MS),
-    })
-    const url = `${env.APP_URL}/auth/verify?token=${token}`
+    const url = await createLoginLink(email, LINK_TTL_MS)
     await mailer.send({
       to: email,
       subject: 'O teu enlace para entrar en Kinotest',
@@ -54,11 +62,21 @@ export const authService = {
     })
   },
 
+  /** Invitation sent when the owner assigns a therapy to an email: same magic link, valid for 7 days. */
+  async sendInvitation(email: string): Promise<void> {
+    const url = await createLoginLink(email, INVITE_TTL_MS)
+    await mailer.send({
+      to: email,
+      subject: 'Convidáronte a usar Kinotest',
+      text: `Convidáronte a usar Kinotest e asignáronche terapias.\n\nEntra con este enlace (caduca en 7 días):\n${url}\n\nSe non esperabas este convite, ignora este correo.`,
+      html: `<p>Convidáronte a usar Kinotest e asignáronche terapias.</p><p><a href="${url}">Entrar en Kinotest</a> (o enlace caduca en 7 días)</p><p>Se non esperabas este convite, ignora este correo.</p>`,
+    })
+  },
+
   async verifyLink(token: string): Promise<Session> {
     const email = await repo.consumeLoginToken(hashToken(token), new Date())
     if (!email) throw new AuthError(401, 'Enlace inválido ou caducado')
-    const isOwner = !!env.OWNER_EMAIL && email === env.OWNER_EMAIL.toLowerCase()
-    const user = await repo.findOrCreateUser(email, isOwner ? 'owner' : 'user')
+    const user = await repo.findOrCreateUser(email, roleForEmail(email))
     return issueSession(toAuthUser(user))
   },
 

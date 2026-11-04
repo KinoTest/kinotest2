@@ -17,6 +17,8 @@ model User {
   id              String              @id @default(uuid())
   email           String              @unique
   role            Role                @default(user)
+  // Set when the user verifies a magic link. Null = account created by the owner (invited) and not confirmed yet.
+  confirmedAt     DateTime?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   contentItems    ContentItem[]

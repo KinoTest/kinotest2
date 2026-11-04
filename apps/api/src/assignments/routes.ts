@@ -3,6 +3,7 @@ import {
   assignmentPatchSchema,
   createAssignmentsSchema,
   deleteAssignmentsSchema,
+  resendInvitationsSchema,
 } from '@kinotest/shared'
 import { Router, type Request } from 'express'
 import { getAuth, requireAuth, requirePermission } from '../auth/middleware.ts'
@@ -23,14 +24,21 @@ assignmentsRouter.get('/', async (req, res) => {
   res.json(await assignmentService.list(query.data))
 })
 
-// Batch: every therapist x every therapy. Existing pairs are skipped, not overwritten.
+// Batch: every therapist (by id or email) x every therapy. Existing pairs are skipped, not overwritten.
+// Unknown emails get an unconfirmed account and an invitation.
 assignmentsRouter.post('/', validate(createAssignmentsSchema), async (req, res) => {
   const result = await assignmentService.create(req.body, getAuth(res).userId)
   if (result.status === 'not_found') {
     res.status(404).json({ error: 'Algún terapeuta ou terapia non existe' })
     return
   }
-  res.status(201).json({ created: result.created, skipped: result.skipped })
+  const { status: _status, ...body } = result
+  res.status(201).json(body)
+})
+
+// Resends the magic-link invitation to unconfirmed accounts; confirmed ones are skipped.
+assignmentsRouter.post('/invitations', validate(resendInvitationsSchema), async (req, res) => {
+  res.json(await assignmentService.resendInvitations(req.body.userIds))
 })
 
 assignmentsRouter.delete('/', validate(deleteAssignmentsSchema), async (req, res) => {

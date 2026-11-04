@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { emailSchema } from './auth.ts'
 
 const idSchema = z.string().min(1).max(64)
 const idListSchema = z.array(idSchema).min(1).max(200)
@@ -15,21 +16,32 @@ const amountSchema = z
 const noteSchema = z.string().trim().max(500)
 const expiresAtSchema = z.string().datetime()
 
-const withinLimit = (v: { userIds: string[]; contentItemIds: string[] }) =>
-  v.userIds.length * v.contentItemIds.length <= MAX_ASSIGNMENT_COMBINATIONS
+const withinLimit = (v: { userIds: string[]; emails?: string[]; contentItemIds: string[] }) =>
+  (v.userIds.length + (v.emails?.length ?? 0)) * v.contentItemIds.length <= MAX_ASSIGNMENT_COMBINATIONS
 const limitMessage = { message: `Máximo ${MAX_ASSIGNMENT_COMBINATIONS} asignacións por petición` }
 
-/** Assigns every therapy in `contentItemIds` (rows of ContentItem) to every user in `userIds`. */
+/**
+ * Assigns every therapy in `contentItemIds` (rows of ContentItem) to every user in `userIds`
+ * and to every address in `emails`. Emails without an account get an unconfirmed account and an invitation.
+ */
 export const createAssignmentsSchema = z
   .object({
-    userIds: idListSchema,
+    userIds: z.array(idSchema).max(200).default([]),
+    emails: z.array(emailSchema).max(200).default([]),
     contentItemIds: idListSchema,
     expiresAt: expiresAtSchema.nullish(),
     note: noteSchema.nullish(),
     amount: amountSchema.nullish(),
   })
+  .refine((v) => v.userIds.length + v.emails.length > 0, { message: 'Indica polo menos un terapeuta ou email' })
   .refine(withinLimit, limitMessage)
 export type CreateAssignments = z.infer<typeof createAssignmentsSchema>
+/** What clients send: `userIds` and `emails` are optional (they default to `[]`). */
+export type CreateAssignmentsInput = z.input<typeof createAssignmentsSchema>
+
+/** Resends the invitation to unconfirmed accounts (confirmed ones are skipped). */
+export const resendInvitationsSchema = z.object({ userIds: idListSchema })
+export type ResendInvitations = z.infer<typeof resendInvitationsSchema>
 
 export const deleteAssignmentsSchema = z
   .object({ userIds: idListSchema, contentItemIds: idListSchema })

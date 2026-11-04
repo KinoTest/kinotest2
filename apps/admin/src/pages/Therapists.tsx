@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import {
   IonBackButton,
+  IonButton,
   IonButtons,
   IonContent,
   IonHeader,
@@ -14,11 +15,13 @@ import {
   IonToolbar,
   useIonViewWillEnter,
 } from '@ionic/react'
+import AssignModal from '../components/AssignModal.tsx'
 import { listUsers, type UserSummary } from '../lib/assignments.ts'
 
 export default function Therapists() {
   const [users, setUsers] = useState<UserSummary[]>([])
   const [error, setError] = useState<string | null>(null)
+  const [inviting, setInviting] = useState(false)
   const search = useRef('')
 
   const load = useCallback(async () => {
@@ -53,6 +56,9 @@ export default function Therapists() {
               void load()
             }}
           />
+          <IonButtons slot="end">
+            <IonButton onClick={() => setInviting(true)}>Novos terapeutas</IonButton>
+          </IonButtons>
         </IonToolbar>
       </IonHeader>
       <IonContent className="ion-padding">
@@ -68,6 +74,7 @@ export default function Therapists() {
                 <h2>{u.email}</h2>
                 <p>
                   {u.assignmentCount} terapia(s) asignada(s){u.role === 'owner' ? ' · propietario' : ''}
+                  {u.confirmedAt ? '' : ' · sen confirmar'}
                 </p>
               </IonLabel>
             </IonItem>
@@ -81,6 +88,18 @@ export default function Therapists() {
           )}
         </IonList>
       </IonContent>
+      {inviting && (
+        <AssignModal
+          mode="emails"
+          fixedId=""
+          excludeIds={[]}
+          onClose={() => setInviting(false)}
+          onDone={() => {
+            setInviting(false)
+            void load()
+          }}
+        />
+      )}
     </IonPage>
   )
 }
