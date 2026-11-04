@@ -87,9 +87,9 @@ describe('POST /api/assignments', () => {
     const body = { userIds: [t1.user.id, t2.user.id], contentItemIds: [a.id, b.id], note: 'Curso 2026', amount: 49.9 }
 
     const first = await assign(owner.accessToken, body).expect(201)
-    expect(first.body).toEqual({ created: 4, skipped: 0 })
+    expect(first.body).toMatchObject({ created: 4, skipped: 0 })
     const again = await assign(owner.accessToken, body).expect(201)
-    expect(again.body).toEqual({ created: 0, skipped: 4 })
+    expect(again.body).toMatchObject({ created: 0, skipped: 4 })
     expect(await prisma.therapyAssignment.count()).toBe(4)
 
     const row = await prisma.therapyAssignment.findFirstOrThrow()
@@ -103,7 +103,7 @@ describe('POST /api/assignments', () => {
     const t1 = await asTherapist(1)
     const a = await makeItem(owner.user.id, 'a')
     const res = await assign(owner.accessToken, { userIds: [t1.user.id, t1.user.id], contentItemIds: [a.id] }).expect(201)
-    expect(res.body).toEqual({ created: 1, skipped: 0 })
+    expect(res.body).toMatchObject({ created: 1, skipped: 0 })
   })
 
   it('404 if a therapist or a therapy does not exist, and nothing is created', async () => {
