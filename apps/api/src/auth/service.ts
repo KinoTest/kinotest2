@@ -17,9 +17,14 @@ export class AuthError extends Error {
   }
 }
 
-/** The OWNER_EMAIL account is the owner; everybody else is a user. */
-export const roleForEmail = (email: string): 'owner' | 'user' =>
-  !!env.OWNER_EMAIL && email === env.OWNER_EMAIL.toLowerCase() ? 'owner' : 'user'
+/** Emails that are owners: `OWNER_EMAILS` (comma-separated) plus the single `OWNER_EMAIL`, lowercase. */
+const ownerEmails = (): string[] =>
+  [...(env.OWNER_EMAILS?.split(',') ?? []), env.OWNER_EMAIL ?? '']
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean)
+
+/** The owner emails are owners; everybody else is a user. */
+export const roleForEmail = (email: string): 'owner' | 'user' => (ownerEmails().includes(email) ? 'owner' : 'user')
 
 async function createLoginLink(email: string, ttlMs: number): Promise<string> {
   const token = newToken()

@@ -8,7 +8,21 @@ const envSchema = z
     CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:5174,http://localhost:4321'),
     JWT_SECRET: z.string().min(32),
     APP_URL: z.string().url(),                       // e.g. http://localhost:5173 | https://staging.kinotest.me
-    OWNER_EMAIL: z.string().email().optional(),      // this email becomes `owner` on first login
+    OWNER_EMAIL: z.string().email().optional(),      // a single owner (still supported); see OWNER_EMAILS
+    // Comma-separated list: these emails become `owner` on login (e.g. "one@x.com, two@x.com")
+    OWNER_EMAILS: z
+      .string()
+      .optional()
+      .refine(
+        (v) =>
+          !v ||
+          v
+            .split(',')
+            .map((e) => e.trim())
+            .filter(Boolean)
+            .every((e) => z.string().email().safeParse(e).success),
+        'Must be a comma-separated list of valid emails',
+      ),
     MAIL_PROVIDER: z.enum(['console', 'resend', 'memory']).default('console'),
     RESEND_API_KEY: z.string().optional(),
     MAIL_FROM: z.string().optional(),                // e.g. "Kinotest <login@kinotest.me>"

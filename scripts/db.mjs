@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Runs the local containers (PostgreSQL and Garage, the S3-compatible image store) with whatever
+// Runs the local containers (PostgreSQL, Adminer and Garage, the S3-compatible image store) with whatever
 // is available: Docker or Podman.
 // Usage: node scripts/db.mjs up|down|logs
 // Override detection with COMPOSE_CMD, e.g. COMPOSE_CMD="podman-compose"
@@ -24,7 +24,7 @@ if (!compose) {
   process.exit(1)
 }
 
-const actions = { up: ['up', '-d', 'db', 'garage'], down: ['down'], logs: ['logs', '-f', 'db', 'garage'] }
+const actions = { up: ['up', '-d', 'db', 'garage', 'adminer'], down: ['down'], logs: ['logs', '-f', 'db', 'garage'] }
 const args = actions[process.argv[2]]
 if (!args) {
   console.error('Usage: node scripts/db.mjs up|down|logs')
