@@ -12,19 +12,19 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@ionic/react": "^9.0.9",
-    "@ionic/react-router": "^9.0.9",
+    "@ionic/react": "^9.0.10",
+    "@ionic/react-router": "^9.0.10",
     "@kinotest/shared": "^0.0.0",
-    "@tiptap/markdown": "^3.32.0",
+    "@tiptap/markdown": "^3.32.2",
     "@tiptap/pm": "^3.32.0",
-    "@tiptap/react": "^3.32.0",
-    "@tiptap/starter-kit": "^3.32.0",
+    "@tiptap/react": "^3.32.2",
+    "@tiptap/starter-kit": "^3.32.2",
     "ionicons": "^8.1.0",
     "react": "^19.2.8",
     "react-arborist": "^4.0.1",
     "react-dom": "^19.2.8",
     "react-markdown": "^10.1.0",
-    "react-router": "^7.18.4",
+    "react-router": "^7.18.5",
     "react-router-dom": "^6.30.6"
   },
   "devDependencies": {
@@ -35,7 +35,7 @@
     "@types/react-dom": "^19.2.7",
     "@vitejs/plugin-react": "^6.1.1",
     "jsdom": "^29.1.1",
-    "oxlint": "^1.89.0",
+    "oxlint": "^1.90.0",
     "typescript": "~6.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
