@@ -18,7 +18,10 @@ export const authRepository = {
     return count === 1 ? token.email : null
   },
 
-  /** Verifying a link confirms the account (invited accounts are created unconfirmed). */
+  /**
+   * Verifying a link confirms the account (invited accounts are created unconfirmed) and promotes an owner
+   * email whose account already existed as `user`. Owners are never demoted here.
+   */
   async findOrCreateUser(email: string, role: 'owner' | 'user') {
     const now = new Date()
     const user = await prisma.user.upsert({
@@ -26,8 +29,12 @@ export const authRepository = {
       update: {},
       create: { email, role, confirmedAt: now },
     })
-    if (user.confirmedAt) return user
-    return prisma.user.update({ where: { id: user.id }, data: { confirmedAt: now } })
+    const promote = role === 'owner' && user.role !== 'owner'
+    if (user.confirmedAt && !promote) return user
+    return prisma.user.update({
+      where: { id: user.id },
+      data: { ...(user.confirmedAt ? {} : { confirmedAt: now }), ...(promote ? { role } : {}) },
+    })
   },
 
   findUserById: (id: string) => prisma.user.findUnique({ where: { id } }),
