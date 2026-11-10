@@ -4,7 +4,11 @@ import { roleSchema } from './roles.ts'
 export const emailSchema = z.string().trim().toLowerCase().email()
 const tokenSchema = z.string().min(20).max(200)
 
-export const requestLinkSchema = z.object({ email: emailSchema })
+/** Which frontend asks for the link: it decides where the link in the email points. */
+export const linkClientSchema = z.enum(['admin', 'app'])
+export type LinkClient = z.infer<typeof linkClientSchema>
+
+export const requestLinkSchema = z.object({ email: emailSchema, client: linkClientSchema.default('admin') })
 export const verifyLinkSchema = z.object({ token: tokenSchema })
 export const refreshSchema = z.object({ refreshToken: tokenSchema })
 

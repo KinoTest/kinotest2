@@ -8,7 +8,7 @@ import rateLimit from 'express-rate-limit'
 import { ZodError } from 'zod'
 import { getAuth, requireAuth } from './middleware.ts'
 import { AuthError, authService } from './service.ts'
-import { env } from '../../../api/src/env.ts'
+import { env } from '../env.ts'
 
 export const authRouter = Router()
 
@@ -21,8 +21,8 @@ const linkLimiter = rateLimit({
 
 // Express 5 forwards rejected promises to the error handler below.
 authRouter.post('/request-link', linkLimiter, async (req, res) => {
-  const { email } = requestLinkSchema.parse(req.body)
-  await authService.requestLink(email)
+  const { email, client } = requestLinkSchema.parse(req.body)
+  await authService.requestLink(email, client)
   res.status(202).json({ ok: true })
 })
 

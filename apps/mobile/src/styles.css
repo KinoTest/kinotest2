@@ -1,0 +1,102 @@
+/* Therapy browser (apps/mobile). Colours come from Ionic variables so dark mode works. */
+.state {
+  padding: 24px 16px;
+  text-align: center;
+}
+.up {
+  padding: 16px;
+}
+
+.breadcrumb {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 6px 10px;
+  background: var(--ion-color-step-50, #f2f2f2);
+  scrollbar-width: none;
+}
+.breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+.crumb-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+.crumb {
+  background: none;
+  border: 0;
+  padding: 6px;
+  font: inherit;
+  color: var(--ion-color-primary);
+  cursor: pointer;
+}
+.crumb.current {
+  color: var(--ion-text-color);
+  font-weight: 600;
+  cursor: default;
+}
+.crumb-sep {
+  color: var(--ion-color-step-500, #888);
+}
+
+.thumbs {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 8px 0 4px;
+}
+.thumbs:empty {
+  display: none;
+}
+.thumb {
+  flex: none;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--ion-color-step-100, #e6e6e6);
+}
+.thumbs.small .thumb {
+  width: 64px;
+  height: 64px;
+}
+.thumbs.large {
+  padding: 8px 16px 4px;
+}
+.thumbs.large .thumb {
+  width: 140px;
+  height: 140px;
+  cursor: zoom-in;
+}
+
+.remedy h1 {
+  margin: 0;
+  padding: 16px 16px 0;
+  font-size: 1.25rem;
+}
+.markdown {
+  padding: 0 16px 12px;
+  line-height: 1.5;
+}
+.markdown ul,
+.markdown ol {
+  padding-left: 1.25rem;
+}
+
+.viewer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 8px;
+}
+.viewer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}

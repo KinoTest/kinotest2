@@ -1,4 +1,4 @@
-import type { AuthUser, Session } from '@kinotest/shared'
+import type { AuthUser, LinkClient, Session } from '@kinotest/shared'
 import { env } from '../env.ts'
 import { mailer } from '../mail/index.ts'
 import { authRepository as repo } from './repository.ts'
@@ -26,14 +26,17 @@ const ownerEmails = (): string[] =>
 /** The owner emails are owners; everybody else is a user. */
 export const roleForEmail = (email: string): 'owner' | 'user' => (ownerEmails().includes(email) ? 'owner' : 'user')
 
-async function createLoginLink(email: string, ttlMs: number): Promise<string> {
+/** The link points to the frontend that asked for it. ADMIN_URL falls back to APP_URL while only one is configured. */
+const baseUrlFor = (client: LinkClient): string => (client === 'app' ? env.APP_URL : (env.ADMIN_URL ?? env.APP_URL))
+
+async function createLoginLink(email: string, ttlMs: number, client: LinkClient): Promise<string> {
   const token = newToken()
   await repo.createLoginToken({
     tokenHash: hashToken(token),
     email,
     expiresAt: new Date(Date.now() + ttlMs),
   })
-  return `${env.APP_URL}/auth/verify?token=${token}`
+  return `${baseUrlFor(client)}/auth/verify?token=${token}`
 }
 
 const toAuthUser = (u: { id: string; email: string; role: 'owner' | 'user' }): AuthUser => ({
@@ -54,11 +57,11 @@ async function issueSession(user: AuthUser): Promise<Session> {
 
 export const authService = {
   /** Always resolves the same way whether or not the email exists, and never creates users. */
-  async requestLink(email: string): Promise<void> {
+  async requestLink(email: string, client: LinkClient = 'admin'): Promise<void> {
     const recent = await repo.countRecentLoginTokens(email, new Date(Date.now() - LINK_TTL_MS))
     if (recent >= MAX_LINKS_PER_WINDOW) return // silently ignored: anti-abuse
 
-    const url = await createLoginLink(email, LINK_TTL_MS)
+    const url = await createLoginLink(email, LINK_TTL_MS, client)
     await mailer.send({
       to: email,
       subject: 'O teu enlace para entrar en Kinotest',
@@ -69,7 +72,7 @@ export const authService = {
 
   /** Invitation sent when the owner assigns a therapy to an email: same magic link, valid for 7 days. */
   async sendInvitation(email: string): Promise<void> {
-    const url = await createLoginLink(email, INVITE_TTL_MS)
+    const url = await createLoginLink(email, INVITE_TTL_MS, 'app') // therapists use the app
     await mailer.send({
       to: email,
       subject: 'Convidáronte a usar Kinotest',

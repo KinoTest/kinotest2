@@ -7,7 +7,8 @@ const envSchema = z
     // Comma-separated list of allowed browser/app origins
     CORS_ORIGINS: z.string().default('http://localhost:5173,http://localhost:5174,http://localhost:4321'),
     JWT_SECRET: z.string().min(32),
-    APP_URL: z.string().url(),                       // e.g. http://localhost:5173 | https://staging.kinotest.me
+    APP_URL: z.string().url(),                       // therapist app (also the target of invitations), e.g. http://localhost:5173
+    ADMIN_URL: z.string().url().optional(),          // owner's panel, e.g. http://localhost:5174; defaults to APP_URL if missing
     OWNER_EMAIL: z.string().email().optional(),      // a single owner (still supported); see OWNER_EMAILS
     // Comma-separated list: these emails become `owner` on login (e.g. "one@x.com, two@x.com")
     OWNER_EMAILS: z

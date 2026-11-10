@@ -10,7 +10,8 @@ export default defineConfig({
     env: {
       DATABASE_URL: TEST_DATABASE_URL,
       JWT_SECRET: 'test-secret-test-secret-test-secret-123',
-      APP_URL: 'http://localhost:5173',
+      APP_URL: 'http://localhost:5173', // therapist app
+      ADMIN_URL: 'http://localhost:5174', // owner's panel: different, so the tests can tell them apart
       CORS_ORIGINS: 'http://localhost:5173',
       OWNER_EMAIL: 'owner@test.com',
       MAIL_PROVIDER: 'memory',
