@@ -1,0 +1,133 @@
+/* Therapy browser (apps/mobile). Colours come from Ionic variables so dark mode works. */
+.state {
+  padding: 24px 16px;
+  text-align: center;
+}
+.up {
+  padding: 16px;
+}
+
+/* The bar holds the background and stays on top while the list scrolls; the nav inside scrolls sideways. */
+.breadcrumb-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--ion-color-step-50, #f2f2f2);
+}
+.breadcrumb {
+  /* Width of the fade on each side; the classes set below turn it on where crumbs are hidden. */
+  --fade-left: 0px;
+  --fade-right: 0px;
+  display: flex;
+  align-items: center;
+  overflow-x: auto;
+  overscroll-behavior-x: contain; /* do not trigger the browser's swipe-back at the ends */
+  white-space: nowrap;
+  padding: 6px 10px;
+  scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  /* A mask fades the crumbs themselves, so no colour has to match the bar (light and dark mode). */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-left), #000 calc(100% - var(--fade-right)), transparent 100%);
+}
+.breadcrumb.fade-left {
+  --fade-left: 28px;
+}
+.breadcrumb.fade-right {
+  --fade-right: 28px;
+}
+.breadcrumb::-webkit-scrollbar {
+  display: none;
+}
+.crumb-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+}
+.crumb {
+  background: none;
+  border: 0;
+  padding: 6px;
+  font: inherit;
+  color: var(--ion-color-primary);
+  cursor: pointer;
+}
+.crumb.current {
+  color: var(--ion-text-color);
+  font-weight: 600;
+  cursor: default;
+}
+.crumb-sep {
+  color: var(--ion-color-step-500, #888);
+}
+
+.thumbs {
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 8px 0 4px;
+}
+.thumbs:empty {
+  display: none;
+}
+.thumb {
+  flex: none;
+  object-fit: cover;
+  border-radius: 6px;
+  background: var(--ion-color-step-100, #e6e6e6);
+}
+.thumbs.small .thumb {
+  width: 64px;
+  height: 64px;
+}
+.thumbs.large {
+  padding: 8px 16px 4px;
+}
+.thumbs.large .thumb {
+  width: 140px;
+  height: 140px;
+  cursor: zoom-in;
+}
+
+.remedy h1 {
+  margin: 0;
+  padding: 16px 16px 0;
+  font-size: 1.25rem;
+}
+.markdown {
+  padding: 0 16px 12px;
+  line-height: 1.5;
+}
+.markdown ul,
+.markdown ol {
+  padding-left: 1.25rem;
+}
+
+.viewer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 8px;
+}
+.viewer img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* Therapy page: the title is left-aligned (it also is on iOS, where Ionic centres it). */
+.therapy-title {
+  text-align: left;
+  padding-inline: 16px 56px;
+}
+.search-count {
+  margin: 0;
+  padding: 10px 16px 4px;
+  font-size: 0.85rem;
+  color: var(--ion-color-step-600, #666);
+}

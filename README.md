@@ -19,7 +19,7 @@ Requires Node 22.18+ and Docker or Podman.
 ```bash
 cp .env.example .env
 npm install
-npm run db:up                           # PostgreSQL and Garage (image store) in containers
+npm run db:up                           # PostgreSQL, Adminer and Garage (image store) in containers
 npm run db:migrate -w @kinotest/api     # applies the migrations
 node scripts/dev-storage.mjs            # once: public read + CORS for the local image bucket
 ```
@@ -35,11 +35,18 @@ npm run dev:site                        # http://localhost:4321
 ```
 
 Sign in at the panel: with `MAIL_PROVIDER=console` (default) the magic link is printed in the API
-terminal. Use the email set in `OWNER_EMAIL` to become `owner`, which is needed to manage content.
+terminal. Use an email listed in `OWNER_EMAILS` to become `owner`, which is needed to manage content.
+`OWNER_EMAILS` is a comma-separated list (`OWNER_EMAILS=one@x.com,two@x.com`), so there can be several
+owners. An account that already exists as `user` is promoted at its next login; removing an email from the
+list does not demote it. `OWNER_EMAIL` (a single email) still works too.
 
 `npm run db:up|db:down|db:logs` auto-detect `docker compose`, `podman compose`, `podman-compose` or
 `docker-compose`. To force one: `COMPOSE_CMD="podman compose" npm run db:up`. Podman needs a compose
 provider installed (`podman-compose` or `docker-compose`).
+
+Adminer, a web UI for the local database, starts with `db:up` at http://localhost:8080 (bound to
+`127.0.0.1`). Log in with System **PostgreSQL**, Server `db`, and `kinotest` as username, password and
+database.
 
 ### Images locally
 
@@ -72,8 +79,8 @@ set `TEST_DATABASE_URL` to change it, its name must end in `_test`).
 ## Authentication
 
 Passwordless: the user asks for a magic link by email and signs in by opening it (open sign-up).
-With `MAIL_PROVIDER=console` (default) the link is printed in the API terminal. The email set in
-`OWNER_EMAIL` becomes the `owner`; everyone else is a `user`.
+With `MAIL_PROVIDER=console` (default) the link is printed in the API terminal. The emails listed in
+`OWNER_EMAILS` (and `OWNER_EMAIL`) become `owner`; everyone else is a `user`.
 
 ## Roles
 
