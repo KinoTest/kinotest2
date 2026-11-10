@@ -51,6 +51,11 @@ export function crumbsOf(root: Catalog, path: number[]): Crumb[] | null {
   return crumbs
 }
 
-/** The page of a therapy; `path` is the catalog or remedy being shown (empty = the root). */
-export const therapyUrl = (id: string, path: number[] = []): string =>
-  `/therapies/${encodeURIComponent(id)}${path.length > 0 ? `?path=${formatPath(path)}` : ''}`
+/**
+ * The page of a therapy; `path` is the catalog or remedy being shown (empty = the root).
+ * With `search`, the page is the search of the therapy (and `path` is where to come back to).
+ */
+export const therapyUrl = (id: string, path: number[] = [], search = false): string => {
+  const query = [path.length > 0 ? `path=${formatPath(path)}` : '', search ? 'search=1' : ''].filter(Boolean).join('&')
+  return `/therapies/${encodeURIComponent(id)}${query ? `?${query}` : ''}`
+}

@@ -120,6 +120,11 @@ describe('therapyUrl', () => {
     expect(therapyUrl('abc', [0, 2])).toBe('/therapies/abc?path=0.2')
   })
 
+  it('marks the search page, keeping the place to come back to', () => {
+    expect(therapyUrl('abc', [], true)).toBe('/therapies/abc?search=1')
+    expect(therapyUrl('abc', [0, 2], true)).toBe('/therapies/abc?path=0.2&search=1')
+  })
+
   it('encodes the id', () => {
     expect(therapyUrl('a/b c')).toBe('/therapies/a%2Fb%20c')
   })

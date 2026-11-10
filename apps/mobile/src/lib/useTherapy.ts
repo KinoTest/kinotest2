@@ -13,6 +13,7 @@ export function useTherapy(id: string): [TherapyState, () => void] {
   const [attempt, setAttempt] = useState(0)
 
   useEffect(() => {
+    if (!id) return // a page kept in the stack while another route is shown can lose its params
     let alive = true
     getTherapy(id).then(
       (therapy) => {
