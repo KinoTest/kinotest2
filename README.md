@@ -9,6 +9,7 @@ TypeScript monorepo (npm workspaces).
 | `apps/site` | Public information site (Astro) |
 | `apps/api` | Express + Prisma + PostgreSQL |
 | `packages/shared` | Zod schemas, roles and permissions shared by all apps |
+| `packages/ui` | React components shared by `mobile` and `admin` (Markdown editor) |
 
 ## Local development
 

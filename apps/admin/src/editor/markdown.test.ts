@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { applyFormat } from './markdown.ts'
+import { applyFormat } from '@kinotest/ui'
 
 describe('inline formats', () => {
   it('wraps the selection and unwraps it again', () => {

@@ -1,10 +1,12 @@
 import { Router, type Request } from 'express'
 import { assignmentService } from '../assignments/service.ts'
 import { getAuth, requireAuth } from '../auth/middleware.ts'
+import { patientsRouter } from '../patients/routes.ts'
 
 export const meRouter = Router()
 
 meRouter.use(requireAuth)
+meRouter.use('/patients', patientsRouter)
 
 // What the signed-in therapist can read: assigned and not expired. Never includes note or amount.
 meRouter.get('/therapies', async (_req, res) => {
