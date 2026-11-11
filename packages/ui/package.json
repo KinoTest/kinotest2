@@ -11,10 +11,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@tiptap/markdown": "^3.32.2",
-    "@tiptap/pm": "^3.32.2",
-    "@tiptap/react": "^3.32.2",
-    "@tiptap/starter-kit": "^3.32.2"
+    "@tiptap/markdown": "^3.33.0",
+    "@tiptap/pm": "^3.33.0",
+    "@tiptap/react": "^3.33.0",
+    "@tiptap/starter-kit": "^3.33.0"
   },
   "peerDependencies": {
     "react": "^19.2.0"
