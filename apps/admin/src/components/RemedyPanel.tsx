@@ -4,7 +4,7 @@ import { NO_HISTORY, THERAPY } from '../editor/state.ts'
 import { cmdInsert, cmdSetField, getNode, newRemedy } from '../editor/tree.ts'
 import type { EditorStore } from '../editor/useEditorStore.ts'
 import ImageManager from './ImageManager.tsx'
-import MarkdownEditor from './MarkdownEditor.tsx'
+import { MarkdownEditor } from '@kinotest/ui'
 
 export default function RemedyPanel({ store }: { store: EditorStore }) {
   const { state, exec } = store

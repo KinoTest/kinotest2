@@ -10,7 +10,7 @@ export default function Login() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  if (session) return <Navigate to="/home" replace />
+  if (session) return <Navigate to="/therapies" replace />
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()

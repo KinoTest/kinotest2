@@ -14,7 +14,7 @@ import {
 import { Tree, type NodeApi, type NodeRendererProps, type TreeApi } from 'react-arborist'
 import { historyKey } from '../editor/keys.ts'
 import { canRedo, canUndo, NO_HISTORY, THERAPY } from '../editor/state.ts'
-import MarkdownEditor from './MarkdownEditor.tsx'
+import { MarkdownEditor } from '@kinotest/ui'
 import {
   cmdInsert,
   cmdMove,

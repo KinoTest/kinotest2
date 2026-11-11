@@ -11,10 +11,10 @@ import {
   IonRefresher,
   IonRefresherContent,
   IonSpinner,
-  IonTitle,
   IonToolbar,
 } from '@ionic/react'
 import { useCallback, useEffect, useState } from 'react'
+import PageTitle from '../components/PageTitle.tsx'
 import { logout } from '../lib/session.ts'
 import { listTherapies, type TherapySummary } from '../lib/therapies.ts'
 import { therapyUrl } from '../lib/tree.ts'
@@ -40,7 +40,7 @@ export default function Home() {
     <IonPage>
       <IonHeader>
         <IonToolbar>
-          <IonTitle>As miñas terapias</IonTitle>
+          <PageTitle kind="therapies">As miñas terapias</PageTitle>
           <IonButtons slot="end">
             <IonButton onClick={() => void logout()}>Saír</IonButton>
           </IonButtons>

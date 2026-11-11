@@ -7,13 +7,13 @@ import {
   IonPage,
   IonSearchbar,
   IonSpinner,
-  IonTitle,
   IonToolbar,
 } from '@ionic/react'
 import { searchOutline } from 'ionicons/icons'
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import CatalogView from '../components/CatalogView.tsx'
+import PageTitle from '../components/PageTitle.tsx'
 import RemedyView from '../components/RemedyView.tsx'
 import SearchResults from '../components/SearchResults.tsx'
 import { search } from '../lib/search.ts'
@@ -53,7 +53,7 @@ export default function Therapy() {
 
   const title = state.status === 'ready' ? state.therapy.title : 'Terapia'
   const toList = (
-    <IonButton fill="outline" onClick={() => navigate('/home')}>
+    <IonButton fill="outline" onClick={() => navigate('/therapies')}>
       Volver ás terapias
     </IonButton>
   )
@@ -119,7 +119,9 @@ export default function Therapy() {
             />
           ) : (
             <>
-              <IonTitle className="therapy-title">{title}</IonTitle>
+              <PageTitle kind="therapies" className="therapy-title">
+                {title}
+              </PageTitle>
               <IonButtons slot="end">
                 <IonButton aria-label="Buscar nesta terapia" onClick={openSearch}>
                   <IonIcon slot="icon-only" icon={searchOutline} />

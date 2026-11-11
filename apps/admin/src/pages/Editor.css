@@ -2,6 +2,7 @@
 .editor-grid {
   --editor-line: rgba(128, 128, 128, 0.35);
   --editor-select: rgba(56, 128, 255, 0.18);
+  --md-line: var(--editor-line); /* MarkdownEditor (@kinotest/ui) */
   position: absolute;
   inset: 0;
   display: grid;
@@ -75,8 +76,7 @@
   font-size: 0.85rem;
 }
 .field input,
-.field textarea,
-.md-textarea {
+.field textarea {
   font: inherit;
   color: inherit;
   padding: 6px 8px;
@@ -154,39 +154,6 @@
   font: inherit;
 }
 
-.md-editor {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.md-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-.md-toolbar button {
-  min-width: 32px;
-  height: 30px;
-  padding: 0 8px;
-  border: 1px solid var(--editor-line);
-  border-radius: 6px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-}
-.md-toolbar button:disabled {
-  opacity: 0.4;
-  cursor: default;
-}
-.md-toolbar .md-toggle {
-  margin-left: auto;
-}
-.md-textarea {
-  min-height: 260px;
-  resize: vertical;
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 0.9rem;
-}
 .md-preview {
   min-height: 260px;
   padding: 4px 12px;
@@ -217,21 +184,6 @@
   height: 90px;
   object-fit: cover;
   border-radius: 6px;
-}
-
-.md-visual {
-  min-height: 260px;
-  padding: 4px 12px;
-  border: 1px solid var(--editor-line);
-  border-radius: 6px;
-  overflow: auto;
-}
-.md-visual .ProseMirror {
-  min-height: 250px;
-  outline: none;
-}
-.md-toolbar button.is-active {
-  background: var(--editor-line);
 }
 
 .image-list li {

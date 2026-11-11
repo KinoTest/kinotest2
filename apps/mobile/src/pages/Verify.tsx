@@ -21,7 +21,7 @@ export default function Verify() {
     setError(null)
     try {
       await verifyLink(token)
-      navigate('/home', { replace: true })
+      navigate('/therapies', { replace: true })
     } catch (err) {
       setError(
         err instanceof ApiError && err.status === 401

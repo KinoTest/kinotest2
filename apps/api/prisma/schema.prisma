@@ -25,6 +25,7 @@ model User {
   refreshTokens   RefreshToken[]
   assignments     TherapyAssignment[] @relation("AssignedTo")
   assignmentsMade TherapyAssignment[] @relation("AssignedBy")
+  patients        Patient[]
 }
 
 // Magic-link token (single use). Only the hash is stored. The user is created on verify.
@@ -91,4 +92,34 @@ model TherapyAssignment {
   @@unique([userId, contentItemId])
   @@index([contentItemId])
   @@index([assignedById])
+}
+
+// A patient of a therapist. Private to that therapist: no one else (not even the owner) reads it.
+// `notes` is free Markdown.
+model Patient {
+  id          String   @id @default(uuid())
+  therapistId String
+  therapist   User     @relation(fields: [therapistId], references: [id], onDelete: Cascade)
+  name        String
+  notes       String   @default("")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  sessions    TherapySession[]
+
+  @@index([therapistId])
+}
+
+// One session with a patient, on a calendar day. `remedies` holds a copy of each remedy chosen
+// (SessionRemedy[] in @kinotest/shared), so the record stays readable when the therapy changes, expires or is unassigned.
+model TherapySession {
+  id        String   @id @default(uuid())
+  patientId String
+  patient   Patient  @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  notes     String   @default("")
+  remedies  Json     @default("[]")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId, date])
 }

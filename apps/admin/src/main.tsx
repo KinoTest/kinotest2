@@ -5,6 +5,7 @@ import '@ionic/react/css/core.css'
 import '@ionic/react/css/normalize.css'
 import '@ionic/react/css/structure.css'
 import '@ionic/react/css/typography.css'
+import '@kinotest/ui/markdown-editor.css'
 import App from './App.tsx'
 
 setupIonicReact()

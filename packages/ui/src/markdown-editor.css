@@ -1,0 +1,55 @@
+/* MarkdownEditor. Set --md-line on an ancestor to change the colour of borders and pressed buttons. */
+.md-editor {
+  --md-line-color: var(--md-line, rgba(128, 128, 128, 0.35));
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.md-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+.md-toolbar button {
+  min-width: 32px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--md-line-color);
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.md-toolbar button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.md-toolbar button.is-active {
+  background: var(--md-line-color);
+}
+.md-toolbar .md-toggle {
+  margin-left: auto;
+}
+.md-textarea {
+  min-height: 260px;
+  resize: vertical;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.9rem;
+  color: inherit;
+  padding: 6px 8px;
+  border: 1px solid var(--md-line-color);
+  border-radius: 6px;
+  background: transparent;
+}
+.md-visual {
+  min-height: 260px;
+  padding: 4px 12px;
+  border: 1px solid var(--md-line-color);
+  border-radius: 6px;
+  overflow: auto;
+}
+.md-visual .ProseMirror {
+  min-height: 250px;
+  outline: none;
+}

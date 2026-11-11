@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 
 import { EditorContent, useEditor, type Editor } from '@tiptap/react'
 import { Markdown } from '@tiptap/markdown'
 import StarterKit from '@tiptap/starter-kit'
-import { applyFormat, type Format } from '../editor/markdown.ts'
+import { applyFormat, type Format } from './markdown.ts'
 
 const HEADING_LEVEL = 2
 

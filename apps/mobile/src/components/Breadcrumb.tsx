@@ -3,7 +3,12 @@ import { useNavigate } from 'react-router-dom'
 import { scrollEdges, type Edges } from '../lib/scrollEdges.ts'
 import type { Crumb } from '../lib/tree.ts'
 
-type Props = { crumbs: Crumb[]; onSelect: (path: number[]) => void }
+type Props = {
+  crumbs: Crumb[]
+  onSelect: (path: number[]) => void
+  /** The first crumb, before the therapy. By default it goes back to the list of therapies. */
+  root?: { label: string; onSelect: () => void }
+}
 
 const LIST_LABEL = 'Tus terapias'
 
@@ -13,7 +18,7 @@ const LIST_LABEL = 'Tus terapias'
  * When it does not fit it scrolls sideways (a finger drags it; a mouse drags it too), and the side that
  * still has hidden crumbs fades out.
  */
-export default function Breadcrumb({ crumbs, onSelect }: Props) {
+export default function Breadcrumb({ crumbs, onSelect, root }: Props) {
   const navigate = useNavigate()
   const ref = useRef<HTMLElement>(null)
   const [edges, setEdges] = useState<Edges>({ left: false, right: false })
@@ -97,8 +102,8 @@ export default function Breadcrumb({ crumbs, onSelect }: Props) {
         }}
       >
         <span className="crumb-wrap">
-          <button type="button" className="crumb" onClick={() => navigate('/home')}>
-            {LIST_LABEL}
+          <button type="button" className="crumb" onClick={root ? root.onSelect : () => navigate('/therapies')}>
+            {root ? root.label : LIST_LABEL}
           </button>
         </span>
         {crumbs.map((crumb, i) => {
