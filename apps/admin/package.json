@@ -15,10 +15,10 @@
     "@ionic/react": "^9.0.10",
     "@ionic/react-router": "^9.0.10",
     "@kinotest/shared": "^0.0.0",
-    "@tiptap/markdown": "^3.32.2",
+    "@tiptap/markdown": "^3.33.0",
     "@tiptap/pm": "^3.32.0",
-    "@tiptap/react": "^3.32.2",
-    "@tiptap/starter-kit": "^3.32.2",
+    "@tiptap/react": "^3.33.0",
+    "@tiptap/starter-kit": "^3.33.0",
     "ionicons": "^8.1.0",
     "react": "^19.2.8",
     "react-arborist": "^4.0.1",
@@ -33,11 +33,11 @@
     "@types/node": "^24.13.3",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.7",
-    "@vitejs/plugin-react": "^6.1.1",
+    "@vitejs/plugin-react": "^6.2.1",
     "jsdom": "^29.1.1",
-    "oxlint": "^1.90.0",
+    "oxlint": "^1.92.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.5",
+    "vite": "^8.3.6",
     "vitest": "^5.0.5"
   }
 }
