@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "me.kinotest.app",
+      "sha256_cert_fingerprints": [
+        "53:15:FE:EF:FD:D8:98:A5:75:13:E4:5D:79:58:3C:DE:A2:63:46:42:86:C6:6C:73:EB:9B:1C:D4:18:0C:14:1C"
+      ]
+    }
+  }
+]

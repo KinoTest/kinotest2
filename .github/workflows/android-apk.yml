@@ -1,0 +1,51 @@
+name: Android APK (debug)
+# Manual only: Actions → "Android APK (debug)" → Run workflow (pick the branch).
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: API URL baked into the app (empty = repo variable VITE_API_URL)
+        required: false
+      media_url:
+        description: Image bucket URL (empty = repo variable VITE_MEDIA_URL)
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      VITE_API_URL: ${{ inputs.api_url || vars.VITE_API_URL }}
+      VITE_MEDIA_URL: ${{ inputs.media_url || vars.VITE_MEDIA_URL }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          check-latest: true
+          cache: npm
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+      - name: Check API URL
+        run: |
+          if [ -z "$VITE_API_URL" ]; then
+            echo "::error::Set the repo variable VITE_API_URL or pass api_url (the phone cannot reach localhost)"
+            exit 1
+          fi
+          echo "API: $VITE_API_URL"
+          echo "Media: ${VITE_MEDIA_URL:-(none)}"
+      - run: npm ci
+      - run: npm run android:sync -w @kinotest/mobile
+      - name: Build debug APK
+        working-directory: apps/mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+      - uses: actions/upload-artifact@v7
+        with:
+          name: kinotest-debug-${{ github.run_number }}
+          path: apps/mobile/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 14
