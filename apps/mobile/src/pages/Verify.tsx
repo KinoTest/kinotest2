@@ -1,19 +1,22 @@
 import { IonButton, IonContent, IonPage, IonText } from '@ionic/react'
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { ApiError, verifyLink } from '../lib/session.ts'
 
 // The button (instead of verifying on load) stops email scanners that open links from consuming the token.
 export default function Verify() {
   const navigate = useNavigate()
-  const [token] = useState(() => new URLSearchParams(window.location.search).get('token'))
+  // From the router, not window.location: in the Android app a second link can arrive (DeepLinks)
+  // while this page is already open.
+  const { search } = useLocation()
+  const token = new URLSearchParams(search).get('token')
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // Remove the token from the address bar (history, Referer).
+  // Remove the token from the address bar (history, Referer). The router keeps its own copy.
   useEffect(() => {
-    window.history.replaceState(null, '', window.location.pathname)
-  }, [])
+    if (token) window.history.replaceState(null, '', window.location.pathname)
+  }, [token])
 
   const enter = async () => {
     if (!token) return
