@@ -4,7 +4,7 @@ TypeScript monorepo (npm workspaces).
 
 | Path | What |
 |---|---|
-| `apps/mobile` | Ionic + React app (Android/iOS later via Capacitor) |
+| `apps/mobile` | Ionic + React app for therapists: web, and Android via Capacitor (iOS later) |
 | `apps/admin` | Ionic + React private control panel (web) |
 | `apps/site` | Public information site (Astro) |
 | `apps/api` | Express + Prisma + PostgreSQL |
@@ -71,6 +71,7 @@ public URL `http://kinotest-dev.web.garage.localhost:3902` (`VITE_MEDIA_URL`).
 npm run db:up
 npm test -w apps/api       # API (Vitest + Supertest, needs PostgreSQL)
 npm test -w apps/admin     # control panel (Vitest + Testing Library)
+npm test -w apps/mobile    # therapist app, pure logic in src/lib (Vitest)
 npm run typecheck          # all workspaces
 ```
 
@@ -97,9 +98,53 @@ Images are referenced by object key, never by URL.
 The admin panel uploads each image straight to the bucket: the browser converts it to WebP,
 asks the API for a presigned URL (`POST /api/content/images/presign`) and sends a `PUT`.
 
+## Android app (Capacitor)
+
+`apps/mobile` is wrapped with Capacitor (`apps/mobile/capacitor.config.ts`, app id `me.kinotest.app`); the
+native project lives in `apps/mobile/android` and is committed. Inside the app the web code is served from
+`https://localhost`.
+
+### Test APK from GitHub Actions
+
+Actions → **Android APK (debug)** → *Run workflow* (manual only; pick the branch). The APK is uploaded as an
+artifact, kept 14 days. The workflow needs:
+
+- Repository variables (Settings → Secrets and variables → Actions → *Variables*): `VITE_API_URL` and
+  `VITE_MEDIA_URL`. Both are baked into the build and must be reachable from the phone, never `localhost`.
+  They can be overridden per run with the `api_url` / `media_url` inputs.
+- `https://localhost` in the API's `CORS_ORIGINS` (comma-separated, no trailing slash).
+
+### Building locally
+
+Requires the Android SDK (`ANDROID_HOME`) and JDK 21 (newer JDKs may not work with the Android Gradle
+Plugin).
+
+```bash
+VITE_API_URL=https://… VITE_MEDIA_URL=https://… npm run android:apk -w @kinotest/mobile
+# → apps/mobile/android/app/build/outputs/apk/debug/app-debug.apk
+npm run android:sync -w @kinotest/mobile   # only build the web and copy it into the Android project
+```
+
+### Sign-in link (App Links)
+
+The magic link (`APP_URL/auth/verify?token=…`) opens the app instead of the browser:
+
+- `AndroidManifest.xml` declares the host (Staging for now:
+  `kinotest2-app-staging.up.railway.app`, path `/auth/verify`).
+- That host serves `/.well-known/assetlinks.json` (`apps/mobile/public/.well-known/`) with the SHA-256 of
+  the signing key. Android checks it **when the app is installed**: deploy the web first, then install.
+- Debug builds are signed with `apps/mobile/android/app/debug.keystore`, committed on purpose so the
+  fingerprint is the same on every machine and CI run. It is not a secret (password `android`) and can
+  never publish to the Play Store; a release key must be created separately and its fingerprint added to
+  `assetlinks.json`.
+- `src/components/DeepLinks.tsx` (`@capacitor/app`) routes the link to the verify page.
+
+To add another environment, add its host to the manifest; `assetlinks.json` ships with each web deploy.
+
 ## Not done yet
 
-- Capacitor (Android/iOS). The apps already read the API URL from `VITE_API_URL`.
+- iOS (Capacitor), release signing and Play Store; secure token storage on the device (tokens are still in
+  `localStorage`); App Links for Production.
 - Production environment on Railway and its R2 bucket (Staging already runs; the configuration
   lives in the Railway dashboard, not in the repo).
 - Migration of the existing images to R2 (`scripts/import-images.mjs`).
