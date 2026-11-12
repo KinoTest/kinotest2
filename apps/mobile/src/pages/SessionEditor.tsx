@@ -43,8 +43,22 @@ import { useLoad } from '../lib/useLoad.ts'
 
 type Draft = { id?: string; date: string; notes: string; remedies: ListedRemedy[] }
 
-/** /patients/:patientId/sessions/new and /patients/:patientId/sessions/:sessionId/edit */
+/**
+ * /patients/:patientId/sessions/new and /patients/:patientId/sessions/:sessionId/edit
+ *
+ * One IonPage for the whole life of the route, never swapped: Ionic only reveals (removes `ion-page-invisible`
+ * from) the page element it saw when the transition started, so a second IonPage mounted once the session has
+ * loaded would stay invisible: a blank screen with only the tab bar.
+ */
 export default function SessionEditorPage() {
+  return (
+    <IonPage>
+      <SessionEditorRoute />
+    </IonPage>
+  )
+}
+
+function SessionEditorRoute() {
   const { patientId = '', sessionId = '' } = useParams()
   const [params] = useSearchParams()
   const [state, reload] = useLoad(sessionId ? `${patientId}/${sessionId}` : '', () => getSession(patientId, sessionId))
@@ -65,7 +79,7 @@ export default function SessionEditorPage() {
     )
   }
   return (
-    <IonPage>
+    <>
       <IonHeader>
         <IonToolbar>
           <PageTitle kind="session">Editar sesión</PageTitle>
@@ -86,7 +100,7 @@ export default function SessionEditorPage() {
           )}
         </div>
       </IonContent>
-    </IonPage>
+    </>
   )
 }
 
@@ -337,7 +351,7 @@ function SessionEditor({ patientId, initial, editNotes = false }: { patientId: s
   const title = place ? (therapy.status === 'ready' ? therapy.value.title : 'Terapia') : isNew ? 'Nova sesión' : 'Editar sesión'
 
   return (
-    <IonPage>
+    <>
       <IonHeader>
         <IonToolbar>
           <IonButtons slot="start">
@@ -367,6 +381,6 @@ function SessionEditor({ patientId, initial, editNotes = false }: { patientId: s
         )}
       </IonHeader>
       <IonContent ref={content}>{body}</IonContent>
-    </IonPage>
+    </>
   )
 }
