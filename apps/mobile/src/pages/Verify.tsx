@@ -1,11 +1,11 @@
-import { IonButton, IonContent, IonPage, IonText } from '@ionic/react'
+import { IonButton, IonContent, IonPage, IonText, useIonRouter } from '@ionic/react'
 import { useEffect, useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { ApiError, verifyLink } from '../lib/session.ts'
 
 // The button (instead of verifying on load) stops email scanners that open links from consuming the token.
 export default function Verify() {
-  const navigate = useNavigate()
+  const router = useIonRouter()
   // From the router, not window.location: in the Android app a second link can arrive (DeepLinks)
   // while this page is already open.
   const { search } = useLocation()
@@ -24,7 +24,8 @@ export default function Verify() {
     setError(null)
     try {
       await verifyLink(token)
-      navigate('/therapies', { replace: true })
+      // 'root' empties Ionic's page stack: the signed-in tabs replace the sign-in pages kept underneath.
+      router.push('/therapies', 'root', 'replace')
     } catch (err) {
       setError(
         err instanceof ApiError && err.status === 401
